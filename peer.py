@@ -4,7 +4,6 @@ import struct
 from enum import Enum
 import peer_request_hendler
 
-sel = selectors.DefaultSelector()
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 HEADER_UNPACKING = '<I B I' # client_id, message_code, payload_size
@@ -14,36 +13,11 @@ def main():
     print('''Hello and welcome to our P2P application!
 Here you can share files with the computers in your network''')
     ip = input("Please enter IP of tracker")
-    sock.bind((ip, 12345))
-    sock.listen(100)
-    sel.register(sock, selectors.EVENT_READ, accept)
-    run_server()
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((ip, 12345))
+    sock.send("hello world".encode())
 
 
-def accept(sock, mask):
-    conn, addr = sock.accept()  # Should be ready
-    print('accepted', conn, 'from', addr)
-    conn.setblocking(False)
-    sel.register(conn, selectors.EVENT_READ, read)
-
-
-def run_server():
-    while True:
-        events = sel.select()
-        for key, mask in events:
-            callback = key.data
-            callback(key.fileobj, mask)
-
-
-def read(conn, mask):
-    data = conn.recv(1000)  # Should be ready
-    if data:
-        print('echoing', repr(data), 'to', conn)
-        conn.send(data)  # Hope it won't block
-    else:
-        print('closing', conn)
-        sel.unregister(conn)
-        conn.close()
 
 def read(conn, mask):
         data_header = conn.recv(struct.calcsize(HEADER_UNPACKING))
