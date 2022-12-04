@@ -15,7 +15,7 @@ Here you can share files with the computers in your network''')
     ip = input("Please enter IP of tracker")
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((ip, 12345))
-    sock.send("hello world".encode())
+    sock.send()
 
 
 
