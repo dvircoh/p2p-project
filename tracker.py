@@ -4,7 +4,7 @@ import tracker_request_handler
 
 
 
-HEADER_UNPACKING = '<I B I' # peer_id, message_code, payload_size
+HEADER_PACKING = '<I I' # message_code, payload_size
 REQUEST_CODES = {'ADD_USER':0, 'REMOVE_USER':1, 'SEND_FILES_LIST':2, 'ADD_FILE':3, 'REMOVE_FILE':4}
 
 def run_tracker(port):
@@ -15,26 +15,28 @@ def run_tracker(port):
     print("Tracker is up and running")
     data = ""
     while True:
-        (peer_socket, peer_address) = tracker_socket.accept()
+        (peer_socket,(peer_address, peer_port)) = tracker_socket.accept()
         print("Peer connected")
-        read(peer_socket) # TODO :change read() to other name
+        read(peer_socket, peer_address) # TODO :change read() to other name
 
-def read(peer_socket):
+def read(peer_socket, peer_address):
     try:
-        data_header = peer_socket.recv(struct.calcsize(HEADER_UNPACKING))
-        peer_id, message_code, payloadsize = struct.unpack(HEADER_UNPACKING, data_header)
-        if payload > 0: # For add_user and remove_user the payload empty
+        data_header = peer_socket.recv(struct.calcsize(HEADER_PACKING))
+        message_code, payloadsize = struct.unpack(HEADER_PACKING, data_header)
+        print(message_code)
+        print(payloadsize)
+        if payloadsize > 0: # For add_user and remove_user the payload empty
                     payload = peer_socket.recv(payloadsize)
-        if message_code == REQUEST_CODES[REQUEST_CODES.ADD_USER]:
-            tracker_request_handler.add_user_handler(peer_socket.address)
-        elif message_code == REQUEST_CODES[REQUEST_CODES.REMOVE_USER]:
+        if message_code == REQUEST_CODES["ADD_USER"]:
+            tracker_request_handler.add_user_handler(peer_address)
+        elif message_code == REQUEST_CODES["REMOVE_USER"]:
             tracker_request_handler.remove_user_handler(peer_id)
-        elif message_code == REQUEST_CODES[REQUEST_CODES.SEND_FILES_LIST]:
+        elif message_code == REQUEST_CODES["SEND_FILES_LIST"]:
             for message in tracker_request_handler.send_files_handler(payload):
                 peer_socket.sendall(message)
-        elif message_code == REQUEST_CODES[REQUEST_CODES.ADD_FILE]:
+        elif message_code == REQUEST_CODES["ADD_FILE"]:
             tracker_request_handler.add_file_handler(peer_id)
-        elif message_code == REQUEST_CODES[REQUEST_CODES.REMOVE_FILE]:
+        elif message_code == REQUEST_CODES["REMOVE_FILE"]:
             tracker_request_handler.remove_file_handler(peer_id, payload)
         else:
             for message in tracker_request_handler.error():
