@@ -19,6 +19,7 @@ def client_struct_generator(client_id, client_name):
 
 def add_user_handler(address):
     print("add user. IP:" + address)
+    
 
 
 # def remove_user_handler(self, user_id):
