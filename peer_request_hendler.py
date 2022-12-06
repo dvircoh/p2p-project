@@ -1,6 +1,11 @@
-# import struct
-# import uuid
+import struct
 
+
+def add_user_handler(IPAddr):
+    print(IPAddr)
+
+def remove_file_handler():
+    
 # # Generic function to create response header struct
 # def header_struct_generator(code, payload_size):
 #     return struct.pack('<B H L', SERVER_VERSION, code, payload_size)
@@ -15,9 +20,6 @@
 #     def __init__(self):
 #         self.users = [] #TODO set - list
 #         self.files = []
-
-def add_user_handler(IPAddr):
-    print(IPAddr)
 
 #         name, public_key = struct.unpack('<255s 160s', payload)
 #         # Strips null terminting values if there are
