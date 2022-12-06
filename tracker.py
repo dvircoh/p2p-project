@@ -29,17 +29,19 @@ def run_tracker(port):
 
 def read(peer_socket, peer_address):
         data_header = peer_socket.recv(struct.calcsize(HEADER_PACKING))
-        message_code, payloadsize = struct.unpack(HEADER_PACKING, data_header)
-        if payloadsize > 0: # For add_user and remove_user the payload empty
-                    payload = peer_socket.recv(payloadsize)
+        message_code, payload_size = struct.unpack(HEADER_PACKING, data_header)
+        if payload_size > 0: # For add_user and remove_user the payload empty
+                    payload = peer_socket.recv(payload_size)
         if message_code == REQUEST_CODES["ADD_USER"]:
             tracker_request_handler.add_user_handler(peer_address)
         elif message_code == REQUEST_CODES["REMOVE_USER"]:
             tracker_request_handler.remove_user_handler(peer_address)
         elif message_code == REQUEST_CODES["SEND_FILES_LIST"]:
-            peer_socket.sendall(tracker_request_handler.send_files_handler())
+            files_list = tracker_request_handler.send_files_handler()
+            peer_socket.sendall(files_list)
         elif message_code == REQUEST_CODES["ADD_FILE"]:
-            tracker_request_handler.add_file_handler(payload)
+            success = tracker_request_handler.add_file_handler(peer_address,payload)
+            peer_socket.sendall(success)
         elif message_code == REQUEST_CODES["REMOVE_FILE"]:
             tracker_request_handler.remove_file_handler(peer_address, payload)
         else:
