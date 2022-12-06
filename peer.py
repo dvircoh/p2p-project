@@ -15,7 +15,7 @@ def create_messege(message_code, payload_size):
 def init():
     tracker_ip = input("Please enter IP of tracker")
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.sockect((tracker_ip, 12345))
+    sock.connect((tracker_ip, 12345))
     messege = create_messege(REQUEST_CODES["ADD_USER"], 0)
     sock.send(messege)
     sock.close()
@@ -27,7 +27,8 @@ def menu(): # TODO: check input
     1. Add file
     2. Remove file
     3. Get file
-    4. Disconnecting from the network''')
+    4. Disconnecting from the network
+    ''')
     return choice
 
 def actions(choice):
