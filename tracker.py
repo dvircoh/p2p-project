@@ -29,9 +29,9 @@ def run_tracker(port):
 
 def read(peer_socket, peer_address):
         data_header = peer_socket.recv(struct.calcsize(HEADER_PACKING))
-        message_code, payloadsize = struct.unpack(HEADER_PACKING, data_header)
-        if payloadsize > 0: # For add_user and remove_user the payload empty
-                    payload = peer_socket.recv(payloadsize)
+        message_code, payload_size = struct.unpack(HEADER_PACKING, data_header)
+        if payload_size > 0: # For add_user and remove_user the payload empty
+                    payload = peer_socket.recv(payload_size)
         if message_code == REQUEST_CODES["ADD_USER"]:
             tracker_request_handler.add_user_handler(peer_address)
         elif message_code == REQUEST_CODES["REMOVE_USER"]:

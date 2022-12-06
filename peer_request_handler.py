@@ -5,6 +5,7 @@ def add_user_handler(IPAddr):
     print(IPAddr)
 
 def remove_file_handler():
+    print("hi")
     
 # # Generic function to create response header struct
 # def header_struct_generator(code, payload_size):
