@@ -2,19 +2,20 @@ import struct
 import crc
 
 
-def add_file_handler(file):
+def add_file_handler():
+    file = input("enter file path:")
     checksum = 123
-    return file , checksum
+    return file, checksum
 
 
 def remove_file_handler():
     print("remove")
 
 def crc_cksum(self, file_content):
-        crc = crc32()
-        crc.update(file_content)
-        crc_checksum = crc.digest()
-        return crc_checksum
+    crc = crc.crc32()
+    crc.update(file_content)
+    crc_checksum = crc.digest()
+    return crc_checksum
 
 
 # # Generic function to create response header struct
