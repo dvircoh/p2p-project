@@ -4,15 +4,16 @@ import struct
 import peer_request_hendler
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-tracker_ip = ""
 REQUEST_CODES = {'ADD_USER':0, 'ADD_FILE':1, 'REMOVE_FILE':2, 'GET_FILE':3, 'REMOVE_USER':4, 'SEND_FILES_LIST':5}
 HEADER_PACKING = '<I I' # message_code, payload_size
+ADD_FILE_PACKING = '<255s I'
 
 def create_messege(message_code, payload_size):
     return struct.pack(HEADER_PACKING, message_code, payload_size)
 
 # Joining the network by sending a message to the tracker
 def init():
+    global tracker_ip 
     tracker_ip = input("Please enter IP of tracker")
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.connect((tracker_ip, 12345))

@@ -1,15 +1,22 @@
 import struct
+import crc
 
 users = []
 files = []
 
-def add_user_handler(IPAddr):
+def add_file_handler(file):
+    checksum = 123
+    return file , checksum
 
-    print(IPAddr)
 
 def remove_file_handler():
     print("remove")
-    
+
+def crc_cksum(self, file_content):
+        crc = crc32()
+        crc.update(file_content)
+        crc_checksum = crc.digest()
+        return crc_checksum
 # # Generic function to create response header struct
 # def header_struct_generator(code, payload_size):
 #     return struct.pack('<B H L', SERVER_VERSION, code, payload_size)
