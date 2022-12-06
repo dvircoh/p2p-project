@@ -1,17 +1,9 @@
 import struct
 
-users = []
-files = []
 
-def add_user_handler(IPAddr):
 
-    print(IPAddr)
 
-def remove_file_handler():
-    print("hi")
-    print("remove")
 
-    
 # # Generic function to create response header struct
 # def header_struct_generator(code, payload_size):
 #     return struct.pack('<B H L', SERVER_VERSION, code, payload_size)
