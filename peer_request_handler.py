@@ -2,20 +2,26 @@ import struct
 from crc import crc32
 import os
 
-files = []
+files = {}
 
 def crc_cksum(file_content):
     crc = crc32()
     crc.update(file_content)
     crc_checksum = crc.digest()
     return crc_checksum
+
 def add_file_handler():
     file_path = input("enter file path:")
+    file_name = os.path.basename(file_path)
+    if file_name in files:
+        print("file exist in the list")
+        return "", 0
+    files[file_name] = file_path
     file = open(file_path)
     print("file opened succesfully  "+file.read())
     checksum = crc_cksum(file.read())
     print(checksum)
-    return os.path.basename(file_path), checksum
+    return file_name, checksum
 
 
 def remove_file_handler():
