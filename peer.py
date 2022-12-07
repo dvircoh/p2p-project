@@ -34,8 +34,7 @@ def menu(): # TODO: check input
 
 def actions(choice):
     if(choice == REQUEST_CODES['ADD_FILE']):
-        file, checksum= peer_request_handler.add_file_handler()
-        #sock.connect((tracker_ip, 12345))
+        file, checksum = peer_request_handler.add_file_handler()
         print(type(file))
         print(tracker_ip)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
