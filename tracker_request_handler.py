@@ -1,34 +1,35 @@
 import struct
 users = []
 files = [] # name, checksum, list of ip addresses
+HEADER_PACKING = '<I I' # message_code, payload_size
+REQUEST_CODES = {'ADD_USER':0, 'ADD_FILE':1, 'REMOVE_FILE':2, 'GET_FILE':3, 'REMOVE_USER':4, 'SEND_FILES_LIST':5}
 
 # Generic function to create response header struct
 def header_struct_generator(code, payload_size):
-    return struct.pack('<I I', code, payload_size)
+    return struct.pack(HEADER_PACKING, code, payload_size)
 
 def add_user_handler(ip_addr):
     users.append(ip_addr)
     print(ip_addr)
 
 def remove_user_handler(ip_addr):
-    users.remove(ip_addr)
+    try:
+        users.remove(ip_addr)
+    except:
+        print("can't remove user, maybe user is not exist")
 
-def add_file_handler(ip_addr,payload):
+def add_file_handler(ip_addr, payload):
     file_name,checksum = struct.unpack('<255s I', payload)
     print(file_name.decode())
     print("checksum is" )
     print( checksum )
     for file in files:
         if file_name == file[0]: # if file name already exist
-            print("im in file_name")
             if checksum == file[1]: # identical checksum
-
                 file[2].append(ip_addr)
                 return True
             return False
     # file name does not exist
-
-    print("im in end of files")
 
     new_file_list = [file_name, checksum, [ip_addr]]
     print("new file list success")
@@ -37,5 +38,21 @@ def add_file_handler(ip_addr,payload):
     return True
 
 
-def remove_user_handler(ip_addr):
-    print("remove user")
+def remove_file_handler(ip_addr, payload):
+    file_name, checksum = struct.unpack('<255s I', payload)
+    for file in files:
+        if file_name == file[0]:
+            if checksum == file[1]:
+                files.remove(file)
+                return
+        else:
+            print("checksum invalid")
+            return
+    print("file not exist")
+
+def send_files_handler():
+    files_string = files.encode()
+    list_length = len(files_string)
+    return [header_struct_generator(REQUEST_CODES["SEND_FILES_LIST"], list_length),
+     struct.pack('<{list_length}s', files_string)]
+    

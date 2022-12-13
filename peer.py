@@ -3,24 +3,24 @@ import socket
 import struct
 import peer_request_handler
 
-
-REQUEST_CODES = {'ADD_USER':0, 'ADD_FILE':1, 'REMOVE_FILE':2, 'GET_FILE':3, 'REMOVE_USER':4, 'SEND_FILES_LIST':5}
-HEADER_PACKING = '<I I' # message_code, payload_size
-ADD_FILE_PACKING = '<255s I'
-
-def create_message(message_code, payload_size):
-    return struct.pack(HEADER_PACKING, message_code, payload_size)
+def send_to_tracker(tracker_ip, message):
+    tracker_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    tracker_socket.connect((tracker_ip, 12345))
+    for item in message:
+        tracker_socket.sendall(item)
+    success = bool(tracker_socket.recv(1).decode())
+    tracker_socket.close()
+    return success
 
 # Joining the network by sending a message to the tracker
-def init():
-    global tracker_ip 
-    tracker_ip = input("Please enter IP of tracker")
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((tracker_ip, 12345))
-    message = create_message(REQUEST_CODES["ADD_USER"], 0)
-    sock.send(message)
-    sock.close()
-    print("The connection was made successfully")    
+def init(tracker_ip):
+    # Create "message" as list for consistenty in send_to_tracker()
+    message = [peer_request_handler.create_message(peer_request_handler.REQUEST_CODES["ADD_USER"], 0)]
+    success = send_to_tracker(tracker_ip, message)
+    if success:
+        print("The connection was made successfully")
+    else:
+        print("The connection failed")    
 
 # Returns the user's choice of the action they want to perform
 def menu(): # TODO: check input
@@ -32,31 +32,25 @@ def menu(): # TODO: check input
     ''')
     return int(choice)
 
-def actions(choice):
-    if(choice == REQUEST_CODES['ADD_FILE']):
-        file, checksum = peer_request_handler.add_file_handler()
-        print(type(file))
-        print(tracker_ip)
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((tracker_ip, 12345))
-        print(struct.calcsize(ADD_FILE_PACKING))
-        sock.send(create_message(REQUEST_CODES["ADD_FILE"], struct.calcsize(ADD_FILE_PACKING)))
-        sock.send(struct.pack(ADD_FILE_PACKING, file.encode(), checksum))
-        success = bool(sock.recv(1).decode())
-        if not success:
-            print("add file don't success, try again")
-        else:
+def actions(tracker_ip, choice):
+    if(choice == peer_request_handler.REQUEST_CODES['ADD_FILE']):
+        file_path = input("enter file path:")
+        message = peer_request_handler.add_file_handler(file_path)
+        success = send_to_tracker(tracker_ip, message)
+        if success:
             print("add file success")
-        #sock.close()
+        else:
+            print("add file don't success, try again")
     #TODO: elif for 2-3-4
 
 def main():
     print('''Hello and welcome to our P2P application!
 Here you can share files with the computers in your network''')
-    init()
+    tracker_ip = input("Please enter IP of tracker")
+    init(tracker_ip)
     while True:
         choice = menu()
-        actions(choice)
+        actions(tracker_ip, choice)
 
 
 
@@ -65,12 +59,13 @@ def read(sock):
         data_header = sock.recv(struct.calcsize(HEADER_PACKING))
         code, payloadsize = struct.unpack(HEADER_PACKING, data_header)
         payload = sock.recv(payloadsize)
-        if code == REQUEST_CODES["USERS_LIST"]:
+        if code == peer_request_handler.REQUEST_CODES["USERS_LIST"]:
             sock.sendall(peer_request_handler.users_list_handler())
-        elif code == REQUEST_CODES["ADD_FILE"]:  # get decrypted file, encrypt it and send CRC
-            for message in peer_request_handler.add_file_handler(payload):
-                sock.sendall(message)
-        elif code == REQUEST_CODES["REQUEST_FILE"]:
+        elif code == peer_request_handler.REQUEST_CODES["ADD_FILE"]:  # get decrypted file, encrypt it and send CRC
+            file_name, checksum = peer_request_handler.add_file_handler(payload)
+
+            sock.sendall(message)
+        elif code == peer_request_handler.REQUEST_CODES["REQUEST_FILE"]:
             for message in peer_request_handler.valid_crc(payload):
                 sock.sendall(message)
         else:

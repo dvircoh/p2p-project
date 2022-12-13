@@ -2,7 +2,13 @@ import struct
 from crc import crc32
 import os
 
+REQUEST_CODES = {'ADD_USER':0, 'ADD_FILE':1, 'REMOVE_FILE':2, 'GET_FILE':3, 'REMOVE_USER':4, 'SEND_FILES_LIST':5}
+HEADER_PACKING = '<I I' # message_code, payload_size
+ADD_FILE_PACKING = '<255s I'
 files = {}
+
+def create_message(message_code, payload_size):
+    return struct.pack(HEADER_PACKING, message_code, payload_size)
 
 def crc_cksum(file_content):
     crc = crc32()
@@ -10,18 +16,24 @@ def crc_cksum(file_content):
     crc_checksum = crc.digest()
     return crc_checksum
 
-def add_file_handler():
-    file_path = input("enter file path:")
+def add_file_handler(file_path):
     file_name = os.path.basename(file_path)
+
     if file_name in files:
         print("file exist in the list")
         return "", 0
+    
+    # Add file to list "files"
     files[file_name] = file_path
-    file = open(file_path)
-    print("file opened succesfully  "+file.read())
-    checksum = crc_cksum(file.read())
-    print(checksum)
-    return file_name, checksum
+    file = open(file_path) # TODO check errors
+    print("file opened succesfully " + file_name)
+
+    checksum = crc_cksum(file.read().encode())
+
+    # Format: header(int request_code, int payload_size), message(string[255] file_name, int
+    # checksum)
+    return [create_message(REQUEST_CODES["ADD_USER"], struct.calcsize(ADD_FILE_PACKING)),
+     struct.pack(ADD_FILE_PACKING, file_name.encode(), checksum)]
 
 
 def remove_file_handler():
