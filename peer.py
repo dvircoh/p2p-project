@@ -34,14 +34,36 @@ def menu(): # TODO: check input
 
 def actions(tracker_ip, choice):
     if(choice == peer_request_handler.REQUEST_CODES['ADD_FILE']):
-        file_path = input("enter file path:")
+        file_path = input("enter file path for adding:")
         message = peer_request_handler.add_file_handler(file_path)
         success = send_to_tracker(tracker_ip, message)
         if success:
             print("add file success")
         else:
             print("add file don't success, try again")
-    #TODO: elif for 2-3-4
+    elif(choice == peer_request_handler.REQUEST_CODES['REMOVE_FILE']):
+        file_name = input("enter filename for remove:")
+        message = peer_request_handler.remove_file_handler(file_name)
+        success = send_to_tracker(tracker_ip, message)
+        if success:
+            print("remove file success")
+        else:
+            print("remove file don't success, try again")
+    elif(choice == peer_request_handler.REQUEST_CODES['REMOVE_USER']):
+        message = peer_request_handler.remove_user_handler()
+        success = send_to_tracker(tracker_ip, message)
+        if success:
+            print("disconnecting success")
+        else:
+            print("disconnecting don't success")
+    elif(choice == peer_request_handler.REQUEST_CODES['SEND_FILES_LIST']):
+        message = peer_request_handler.send_files_list_handler()
+        success = send_to_tracker(tracker_ip, message)
+        if success:
+            # receive list
+            print("")
+        else:
+            print("")
 
 def main():
     print('''Hello and welcome to our P2P application!
@@ -51,9 +73,6 @@ Here you can share files with the computers in your network''')
     while True:
         choice = menu()
         actions(tracker_ip, choice)
-
-
-
 
 def read(sock):
         data_header = sock.recv(struct.calcsize(HEADER_PACKING))

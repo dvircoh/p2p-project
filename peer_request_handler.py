@@ -5,6 +5,7 @@ import os
 REQUEST_CODES = {'ADD_USER':0, 'ADD_FILE':1, 'REMOVE_FILE':2, 'GET_FILE':3, 'REMOVE_USER':4, 'SEND_FILES_LIST':5}
 HEADER_PACKING = '<I I' # message_code, payload_size
 ADD_FILE_PACKING = '<255s I'
+REMOVE_FILE_PACKING = '<255s'
 files = {}
 
 def create_message(message_code, payload_size):
@@ -21,7 +22,7 @@ def add_file_handler(file_path):
 
     if file_name in files:
         print("file exist in the list")
-        return "", 0
+        return [0]
     
     # Add file to list "files"
     files[file_name] = file_path
@@ -36,10 +37,21 @@ def add_file_handler(file_path):
      struct.pack(ADD_FILE_PACKING, file_name.encode(), checksum)]
 
 
-def remove_file_handler():
-    print("remove")
+def remove_file_handler(file_name):
+    if file_name in files:
+        # remove the file from the files dictionary
+        del files[file_name]
+        return [create_message(REQUEST_CODES["REMOVE_USER"], struct.calcsize(REMOVE_FILE_PACKING)),
+         struct.pack(REMOVE_FILE_PACKING, file_name.encode())]
+    else:
+        print("file not exist in the list")
+        return [0]
 
+def remove_user_handler():
+    return [create_message(REQUEST_CODES["REMOVE_USER"], 0)]
 
+def send_files_list_handler():
+    return [create_message(REQUEST_CODES["SEND_FILES_LIST"], 0)]
 
 
 # # Generic function to create response header struct
