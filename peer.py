@@ -2,7 +2,7 @@ import selectors
 import socket
 import struct
 import peer_request_handler
-
+HEADER_PACKING = '<I I' # message_code, payload_size
 def send_to_tracker(tracker_ip, message):
     tracker_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     tracker_socket.connect((tracker_ip, 12345))
@@ -11,6 +11,20 @@ def send_to_tracker(tracker_ip, message):
     success = bool(tracker_socket.recv(1).decode())
     tracker_socket.close()
     return success
+
+def send_and_recv_tracker(tracker_ip, message):
+    tracker_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    tracker_socket.connect((tracker_ip, 12345))
+    for item in message:
+        tracker_socket.sendall(item)
+
+    data_header = tracker_socket.recv(struct.calcsize(HEADER_PACKING))
+    message_code, payload_size = struct.unpack(HEADER_PACKING, data_header)
+    if payload_size > 0:  # For add_user and remove_user the payload empty
+        payload = tracker_socket.recv(payload_size)
+
+    tracker_socket.close()
+    return payload
 
 # Joining the network by sending a message to the tracker
 def init(tracker_ip):
@@ -57,12 +71,8 @@ def actions(tracker_ip, choice):
             print("disconnecting don't success")
     elif(choice == peer_request_handler.REQUEST_CODES['SEND_FILES_LIST']):
         message = peer_request_handler.send_files_list_handler()
-        success = send_to_tracker(tracker_ip, message)
-        if success:
-            # receive list
-            print("")
-        else:
-            print("")
+        payload = send_and_recv_tracker(tracker_ip, message)
+
 
 def main():
     print('''Hello and welcome to our P2P application!

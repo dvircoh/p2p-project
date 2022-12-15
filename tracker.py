@@ -44,7 +44,8 @@ def read(peer_socket, peer_address):
             tracker_request_handler.remove_user_handler(payload)
         elif message_code == REQUEST_CODES["SEND_FILES_LIST"]:
             files_list = tracker_request_handler.send_files_handler()
-            peer_socket.sendall(files_list)
+            peer_socket.sendall(files_list[0])
+            peer_socket.sendall(files_list[1])
         elif message_code == REQUEST_CODES["ADD_FILE"]:
             success = tracker_request_handler.add_file_handler(peer_address,payload)
             print(success)

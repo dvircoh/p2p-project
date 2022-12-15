@@ -57,8 +57,11 @@ def remove_file_handler(ip_addr,payload):
 
 
 def send_files_handler():
-    files_string = files.encode()
+    files_string = str(files)
+    files_string = files_string.encode('utf-8')
+    print(files_string)
     list_length = len(files_string)
+    print(type(files_string))
     return [header_struct_generator(REQUEST_CODES["SEND_FILES_LIST"], list_length),
-     struct.pack('<{list_length}s', files_string)]
+     struct.pack(f'<{len(files_string)}s',files_string)]
     
