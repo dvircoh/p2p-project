@@ -17,6 +17,7 @@ def add_user_handler(ip_addr):
     return True
 
 def remove_user_handler(ip_addr):
+
     try:
         users.remove(ip_addr)
     except:
@@ -42,17 +43,16 @@ def add_file_handler(ip_addr, payload):
     return True
 
 
-def remove_file_handler(ip_addr, payload):
-    file_name, checksum = struct.unpack('<255s I', payload)
+def remove_file_handler(ip_addr,payload):
+    file_name = struct.unpack('<255s', payload)[0]
     for file in files:
-        if file_name == file[0]:
-            if checksum == file[1]:
-                files.remove(file)
-                return True
-        else:
-            print("checksum invalid")
-            return False
-    print("file not exist")
+        if file_name == file[0]: #the file name
+            #loop in order to find the ip address to extract from ip's list
+            for ip in file[2]:
+                if ip_addr == ip:
+                    file[2].remove(ip)
+                    return True
+    print("file does not exist")
     return False
 
 

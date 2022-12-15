@@ -21,23 +21,25 @@ def add_file_handler(file_path):
     file_name = os.path.basename(file_path)
 
     if file_name in files:
+        print(files)
         print("file exist in the list")
-        return [0]
+        return [False]
     
     # Add file to list "files"
     files[file_name] = file_path
     try:
         file = open(file_path) # TODO check errors
         print("file opened succesfully " + file_name)
+        checksum = crc_cksum(file.read().encode())
     except Exception as e:
         print(e)
-        return [0]
+        return [False]
 
-    checksum = crc_cksum(file.read().encode())
+
 
     # Format: header(int request_code, int payload_size), message(string[255] file_name, int
     # checksum)
-    return [create_message(REQUEST_CODES["ADD_USER"], struct.calcsize(ADD_FILE_PACKING)),
+    return [create_message(REQUEST_CODES["ADD_FILE"], struct.calcsize(ADD_FILE_PACKING)),
      struct.pack(ADD_FILE_PACKING, file_name.encode(), checksum)]
 
 
@@ -48,8 +50,8 @@ def remove_file_handler(file_name):
         return [create_message(REQUEST_CODES["REMOVE_FILE"], struct.calcsize(REMOVE_FILE_PACKING)),
          struct.pack(REMOVE_FILE_PACKING, file_name.encode())]
     else:
-        print("file not exist in the list")
-        return [0]
+        print("file does not exist in the list")
+        return [False]
 
 def remove_user_handler():
     return [create_message(REQUEST_CODES["REMOVE_USER"], 0)]

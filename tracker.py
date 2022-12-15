@@ -25,8 +25,8 @@ def run_tracker(port):
             print("error with connection")
             peer_socket.close()
         # if exception happened receive error message
-        except:
-            print("error")
+        except Exception as e:
+            print(e)
 
 
 def read(peer_socket, peer_address):
@@ -41,7 +41,7 @@ def read(peer_socket, peer_address):
             print(success)
             peer_socket.send(str(success).encode())
         elif message_code == REQUEST_CODES["REMOVE_USER"]:
-            tracker_request_handler.remove_user_handler(peer_address)
+            tracker_request_handler.remove_user_handler(payload)
         elif message_code == REQUEST_CODES["SEND_FILES_LIST"]:
             files_list = tracker_request_handler.send_files_handler()
             peer_socket.sendall(files_list)
@@ -50,7 +50,9 @@ def read(peer_socket, peer_address):
             print(success)
             peer_socket.send(str(success).encode())
         elif message_code == REQUEST_CODES["REMOVE_FILE"]:
-            tracker_request_handler.remove_file_handler(peer_address, payload)
+            success = tracker_request_handler.remove_file_handler(peer_address, payload)
+            print(success)
+            peer_socket.send(str(success).encode())
         else:
             for message in tracker_request_handler.error():
                 peer_socket.sendall(message)
