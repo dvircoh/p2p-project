@@ -17,10 +17,7 @@ def init(tracker_ip):
     # Create "message" as list for consistenty in send_to_tracker()
     message = [peer_request_handler.create_message(peer_request_handler.REQUEST_CODES["ADD_USER"], 0)]
     success = send_to_tracker(tracker_ip, message)
-    if success:
-        print("The connection was made successfully")
-    else:
-        print("The connection failed")    
+    return success  
 
 # Returns the user's choice of the action they want to perform
 def menu(): # TODO: check input
@@ -68,8 +65,18 @@ def actions(tracker_ip, choice):
 def main():
     print('''Hello and welcome to our P2P application!
 Here you can share files with the computers in your network''')
-    tracker_ip = input("Please enter IP of tracker")
-    init(tracker_ip)
+    init_success = False
+
+    # Loop for join tracker lists
+    while not init_success:
+        tracker_ip = input("Please enter IP of tracker")
+        init_success = init(tracker_ip)
+        if init_success:
+            print("The connection was made successfully")
+        else:
+            print("The connection failed try again")
+    
+    # Tha main loop
     while True:
         choice = menu()
         actions(tracker_ip, choice)
