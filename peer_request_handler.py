@@ -41,7 +41,7 @@ def remove_file_handler(file_name):
     if file_name in files:
         # remove the file from the files dictionary
         del files[file_name]
-        return [create_message(REQUEST_CODES["REMOVE_USER"], struct.calcsize(REMOVE_FILE_PACKING)),
+        return [create_message(REQUEST_CODES["REMOVE_FILE"], struct.calcsize(REMOVE_FILE_PACKING)),
          struct.pack(REMOVE_FILE_PACKING, file_name.encode())]
     else:
         print("file not exist in the list")

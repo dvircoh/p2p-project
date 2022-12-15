@@ -12,6 +12,8 @@ def run_tracker(port):
     tracker_socket.listen()
     print("Tracker is up and running")
     data = ""
+
+    # Main loop
     while True:
         try:
             (peer_socket,(peer_address, peer_port)) = tracker_socket.accept()
