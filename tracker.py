@@ -35,9 +35,11 @@ def read(peer_socket, peer_address):
         print(message_code)
         if payload_size > 0: # For add_user and remove_user the payload empty
                     payload = peer_socket.recv(payload_size)
-                    print(payload)
+                   # print(payload)
         if message_code == REQUEST_CODES["ADD_USER"]:
-            tracker_request_handler.add_user_handler(peer_address)
+            success = tracker_request_handler.add_user_handler(peer_address)
+            print(success)
+            peer_socket.send(str(success).encode())
         elif message_code == REQUEST_CODES["REMOVE_USER"]:
             tracker_request_handler.remove_user_handler(peer_address)
         elif message_code == REQUEST_CODES["SEND_FILES_LIST"]:

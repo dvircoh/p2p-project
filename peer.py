@@ -33,6 +33,8 @@ def actions(tracker_ip, choice):
     if(choice == peer_request_handler.REQUEST_CODES['ADD_FILE']):
         file_path = input("enter file path for adding:")
         message = peer_request_handler.add_file_handler(file_path)
+        if message[0] == 0: # file adding failed
+            return
         success = send_to_tracker(tracker_ip, message)
         if success:
             print("add file success")

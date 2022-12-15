@@ -9,8 +9,12 @@ def header_struct_generator(code, payload_size):
     return struct.pack(HEADER_PACKING, code, payload_size)
 
 def add_user_handler(ip_addr):
+   # if ip_addr in users:
+   #     print("user is already exist,try a different request")
+   #     return False
     users.append(ip_addr)
     print(ip_addr)
+    return True
 
 def remove_user_handler(ip_addr):
     try:
@@ -22,7 +26,7 @@ def add_file_handler(ip_addr, payload):
     file_name,checksum = struct.unpack('<255s I', payload)
     print(file_name.decode())
     print("checksum is" )
-    print( checksum )
+    print(checksum)
     for file in files:
         if file_name == file[0]: # if file name already exist
             if checksum == file[1]: # identical checksum
@@ -44,11 +48,13 @@ def remove_file_handler(ip_addr, payload):
         if file_name == file[0]:
             if checksum == file[1]:
                 files.remove(file)
-                return
+                return True
         else:
             print("checksum invalid")
-            return
+            return False
     print("file not exist")
+    return False
+
 
 def send_files_handler():
     files_string = files.encode()

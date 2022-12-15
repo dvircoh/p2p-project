@@ -26,8 +26,12 @@ def add_file_handler(file_path):
     
     # Add file to list "files"
     files[file_name] = file_path
-    file = open(file_path) # TODO check errors
-    print("file opened succesfully " + file_name)
+    try:
+        file = open(file_path) # TODO check errors
+        print("file opened succesfully " + file_name)
+    except Exception as e:
+        print(e)
+        return [0]
 
     checksum = crc_cksum(file.read().encode())
 
