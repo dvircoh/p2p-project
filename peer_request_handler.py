@@ -13,10 +13,11 @@ def crc_cksum(file_content)->int:
 
 def add_file_handler(file_path: str)->list:
     file_name = os.path.basename(file_path)
+    file_size = 0
 
     if file_name in files:
         print(files)
-        print("file exist in the list")
+        print("This file already exist in the list")
         return [False]
     
     try:
@@ -25,6 +26,7 @@ def add_file_handler(file_path: str)->list:
         checksum = crc_cksum(file.read().encode())
         # Add file to list "files"
         files[file_name] = file_path
+        file_size = os.path.getsize(file_path)
     except Exception as e:
         print(e)
         return [False]
@@ -32,9 +34,9 @@ def add_file_handler(file_path: str)->list:
 
 
     # Format: header(int request_code, int payload_size), message(string[255] file_name, int
-    # checksum)
+    # checksum, int file_size)
     return [utils.header_struct_generator(utils.REQUEST_CODES["ADD_FILE"], struct.calcsize(utils.ADD_FILE_PACKING)),
-     struct.pack(utils.ADD_FILE_PACKING, file_name.encode(), checksum)]
+     struct.pack(utils.ADD_FILE_PACKING, file_name.encode(), checksum, file_size)]
 
 
 def remove_file_handler(file_name):

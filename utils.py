@@ -10,7 +10,7 @@ REQUEST_CODES = {'ADD_USER':        0,
                  'SEND_FILE':       7}
 
 HEADER_PACKING =       '<I I' # message_code, payload_size
-ADD_FILE_PACKING =     '<255s I' # file_name, checksum
+ADD_FILE_PACKING =     '<255s I I' # file_name, checksum, file_size
 REMOVE_FILE_PACKING =  '<255s' # file_name
 REQUEST_FILE_PACKING = '<255s I' # file_name, chank_number
 SEND_FILE_PACKING =    '<4096s I I' # data, actual size, checksum

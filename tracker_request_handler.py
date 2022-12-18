@@ -2,7 +2,7 @@ import struct
 import utils
 
 users = []
-files = [] # name, checksum, list of ip addresses
+files = [] # name, checksum, size, list of ip addresses
 
 def add_user_handler(ip_addr):
    # if ip_addr in users:
@@ -20,19 +20,19 @@ def remove_user_handler(ip_addr):
         print("can't remove user, maybe user is not exist")
 
 def add_file_handler(ip_addr, payload):
-    file_name,checksum = struct.unpack('<255s I', payload)
+    file_name, checksum, file_size = struct.unpack(utils.ADD_FILE_PACKING, payload)
     print(file_name.decode().strip())
     print("checksum is" )
     print(checksum)
     for file in files:
         if file_name == file[0]: # if file name already exist
             if checksum == file[1]: # identical checksum
-                file[2].append(ip_addr)
+                file[3].append(ip_addr)
                 return True
             return False
     # file name does not exist
 
-    new_file_list = [file_name, checksum, [ip_addr]]
+    new_file_list = [file_name, checksum, file_size, [ip_addr]]
     print("new file list success")
     files.append(new_file_list)
     print("append")
@@ -44,10 +44,10 @@ def remove_file_handler(ip_addr,payload):
     for file in files:
         if file_name == file[0]: #the file name
             #loop in order to find the ip address to extract from ip's list
-            for ip in file[2]:
+            for ip in file[3]:
                 if ip_addr == ip:
-                    file[2].remove(ip)
-                    if file[2] == []:
+                    file[3].remove(ip)
+                    if file[3] == []:
                         files.remove(file)
                     return True
     print("file does not exist")

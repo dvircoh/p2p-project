@@ -111,7 +111,7 @@ async def actions(tracker_ip, choice):
             print("The file list is empty, there are no files to receive")
         else:
             choice = await select_file(files_list)
-            peers_list = files_list[choice][2]
+            peers_list = files_list[choice][3]
             # TODO: requst the chancs and appent them
 
 async def peer_connected_handler(reader, writer):
