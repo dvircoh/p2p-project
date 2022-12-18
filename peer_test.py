@@ -12,14 +12,18 @@ async def main():
     result = await peer.send_to_tracker(tracker_ip, message)
     assert result, "add file failed"
     print("Test: add file success")
+    message = peer.peer_request_handler.send_files_list_handler()
+    result = await peer.send_and_recv_tracker(tracker_ip, message)
+    result = eval(result.decode('utf-8'))
+    print(result)
+    print(type(result))
+    await peer.actions(tracker_ip, 5)
+    #assert result, "request files list failed"
+    print("Test: request files list success")
     message = peer.peer_request_handler.remove_file_handler("hello_world")
     result = await peer.send_to_tracker(tracker_ip, message)
     assert result, "remove file failed"
     print("Test: remove file success")
-    message = peer.peer_request_handler.send_files_list_handler()
-    result = await peer.send_and_recv_tracker(tracker_ip, message)
-    #assert result, "request files list failed"
-    print("Test: request files list success")
     message = peer.peer_request_handler.remove_user_handler()
     result = await peer.send_to_tracker(tracker_ip, message)
     assert result, "disconnecting failed"

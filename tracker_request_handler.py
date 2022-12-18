@@ -21,7 +21,7 @@ def remove_user_handler(ip_addr):
 
 def add_file_handler(ip_addr, payload):
     file_name,checksum = struct.unpack('<255s I', payload)
-    print(file_name.decode())
+    print(file_name.decode().strip())
     print("checksum is" )
     print(checksum)
     for file in files:
@@ -47,6 +47,8 @@ def remove_file_handler(ip_addr,payload):
             for ip in file[2]:
                 if ip_addr == ip:
                     file[2].remove(ip)
+                    if file[2] == []:
+                        files.remove(file)
                     return True
     print("file does not exist")
     return False
@@ -59,5 +61,5 @@ def send_files_handler():
     list_length = len(files_string)
     print(type(files_string))
     return [utils.header_struct_generator(utils.REQUEST_CODES["SEND_FILES_LIST"], list_length),
-     struct.pack(f'<{len(files_string)}s',files_string)]
+     struct.pack(f'<{list_length}s',files_string)]
     

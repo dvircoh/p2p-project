@@ -50,6 +50,15 @@ async def menu()->int: # TODO: check input
     ''')
     return int(choice)
 
+async def select_file(files_list: list)->int:
+    print("Please select a file from the following files")
+    for index, file in enumerate(files_list):
+        # print index and file_name
+        print(str(index) + ") - " + file[0].decode())
+
+    choice = await ainput("Enter the file number you want")
+    return int(choice)
+
 async def tracker_connection():
     init_success = False
 
@@ -95,7 +104,15 @@ async def actions(tracker_ip, choice):
             print("disconnecting don't success")
     elif(choice == utils.REQUEST_CODES['SEND_FILES_LIST']):
         message = peer_request_handler.send_files_list_handler()
-        payload = await send_and_recv_tracker(tracker_ip, message)
+        result = await send_and_recv_tracker(tracker_ip, message)
+        # Create list from the bytes
+        files_list = eval(result.decode('utf-8'))
+        if files_list == []: # Check if the list empty
+            print("The file list is empty, there are no files to receive")
+        else:
+            choice = await select_file(files_list)
+            peers_list = files_list[choice][2]
+            # TODO: requst the chancs and appent them
 
 async def peer_connected_handler(reader, writer):
     print(writer.get_extra_info('peername'))
