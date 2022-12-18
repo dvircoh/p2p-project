@@ -1,12 +1,8 @@
 import struct
+import utils
+
 users = []
 files = [] # name, checksum, list of ip addresses
-HEADER_PACKING = '<I I' # message_code, payload_size
-REQUEST_CODES = {'ADD_USER':0, 'ADD_FILE':1, 'REMOVE_FILE':2, 'GET_FILE':3, 'REMOVE_USER':4, 'SEND_FILES_LIST':5}
-
-# Generic function to create response header struct
-def header_struct_generator(code, payload_size):
-    return struct.pack(HEADER_PACKING, code, payload_size)
 
 def add_user_handler(ip_addr):
    # if ip_addr in users:
@@ -62,6 +58,6 @@ def send_files_handler():
     print(files_string)
     list_length = len(files_string)
     print(type(files_string))
-    return [header_struct_generator(REQUEST_CODES["SEND_FILES_LIST"], list_length),
+    return [utils.header_struct_generator(utils.REQUEST_CODES["SEND_FILES_LIST"], list_length),
      struct.pack(f'<{len(files_string)}s',files_string)]
     
