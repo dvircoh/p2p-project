@@ -67,13 +67,6 @@ async def tracker_connection():
         print("choice" , choice) #TODO - delete
         await actions(tracker_ip, choice)
 
-async def peer_connected_handler(reader, writer):
-    print(writer.get_extra_info('peername'))
-
-async def peers_connection():
-     server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12346')
-     await server.serve_forever()
-
 async def actions(tracker_ip, choice):
     if(choice == utils.REQUEST_CODES['ADD_FILE']):
         file_path = await ainput("enter file path for adding:")
@@ -104,6 +97,12 @@ async def actions(tracker_ip, choice):
         message = peer_request_handler.send_files_list_handler()
         payload = await send_and_recv_tracker(tracker_ip, message)
 
+async def peer_connected_handler(reader, writer):
+    print(writer.get_extra_info('peername'))
+
+async def peers_connection():
+     server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12346')
+     await server.serve_forever()
 
 async def main():
     print('''Hello and welcome to our P2P application!
