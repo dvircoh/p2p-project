@@ -27,11 +27,11 @@ def add_file_handler(file_path: str)->list:
         # Add file to list "files"
         files[file_name] = file_path
         file_size = os.path.getsize(file_path)
+        print("file size is:")
+        print(file_size)
     except Exception as e:
         print(e)
         return [False]
-
-
 
     # Format: header(int request_code, int payload_size), message(string[255] file_name, int
     # checksum, int file_size)

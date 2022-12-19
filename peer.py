@@ -114,9 +114,25 @@ async def actions(tracker_ip, choice):
         else:
             choice = await select_file(files_list)
             peers_list = files_list[choice][3]
-            number_of_chunks = files_list[choice][2] % utils.CHUNK_SIZE
-            get_chunk()
+            number_of_chunks = int(files_list[choice][2] / utils.CHUNK_SIZE)
+            file_name = files_list[choice][0].decode().rstrip('\x00')
+            print(files_list[choice][0].decode().rstrip('\x00'))
+            get_chunk(file_name,number_of_chunks)
             # TODO: request the chunks and append them
+
+def get_chunk(file_name,num_of_chunks):
+    try:
+        file = open(file_name)
+        for x in range(num_of_chunks+1): # loop for sending the chunks.
+            print(num_of_chunks)
+            chunk = file.read(utils.CHUNK_SIZE)
+            print(chunk)
+
+        file.close()
+    except Exception as e:
+        print(e)
+
+
 
 async def peer_connected_handler(reader, writer):
     print(writer.get_extra_info('peername'))

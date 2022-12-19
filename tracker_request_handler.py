@@ -31,7 +31,8 @@ def add_file_handler(ip_addr, payload):
                 return True
             return False
     # file name does not exist
-
+    print("file_size on tracker is:")
+    print(file_size)
     new_file_list = [file_name, checksum, file_size, [ip_addr]]
     print("new file list success")
     files.append(new_file_list)
