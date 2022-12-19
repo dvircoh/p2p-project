@@ -54,7 +54,7 @@ async def select_file(files_list: list)->int:
     print("Please select a file from the following files")
     for index, file in enumerate(files_list):
         # print index and file_name
-        print(str(index) + ") - " + file[0].decode())
+        print(str(index) + ") - " + file[0].decode().rstrip('\x00'))
 
     choice = await ainput("Enter the file number you want")
     return int(choice)
@@ -106,13 +106,17 @@ async def actions(tracker_ip, choice):
         message = peer_request_handler.send_files_list_handler()
         result = await send_and_recv_tracker(tracker_ip, message)
         # Create list from the bytes
+        print(result.decode('utf-8'))
         files_list = eval(result.decode('utf-8'))
+        print(files_list)
         if files_list == []: # Check if the list empty
             print("The file list is empty, there are no files to receive")
         else:
             choice = await select_file(files_list)
             peers_list = files_list[choice][3]
-            # TODO: requst the chancs and appent them
+            number_of_chunks = files_list[choice][2] % utils.CHUNK_SIZE
+            get_chunk()
+            # TODO: request the chunks and append them
 
 async def peer_connected_handler(reader, writer):
     print(writer.get_extra_info('peername'))

@@ -17,7 +17,7 @@ async def main():
     result = eval(result.decode('utf-8'))
     print(result)
     print(type(result))
-    #await peer.actions(tracker_ip, 5)
+    await peer.actions(tracker_ip, 5)
     #assert result, "request files list failed"
     print("Test: request files list success")
     message = peer.peer_request_handler.remove_file_handler("hello_world")
