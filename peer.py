@@ -1,4 +1,5 @@
 import asyncio
+from math import ceil
 import utils
 import socket
 import peer_request_handler
@@ -113,26 +114,20 @@ async def actions(tracker_ip, choice):
             print("The file list is empty, there are no files to receive")
         else:
             choice = await select_file(files_list)
-            peers_list = files_list[choice][3]
-            number_of_chunks = int(files_list[choice][2] / utils.CHUNK_SIZE)
-            file_name = files_list[choice][0].decode().rstrip('\x00')
-            print(files_list[choice][0].decode().rstrip('\x00'))
-            get_chunk(file_name,number_of_chunks)
-            # TODO: request the chunks and append them
-
-def get_chunk(file_name,num_of_chunks):
-    try:
-        file = open(file_name)
-        for x in range(num_of_chunks+1): # loop for sending the chunks.
-            print(num_of_chunks)
-            chunk = file.read(utils.CHUNK_SIZE)
-            print(chunk)
-
-        file.close()
-    except Exception as e:
-        print(e)
+            success = await recive_file(files_list[choice])
 
 
+async def recive_file(file: list)->bool:
+    peers_list = file[3]
+    file_size = file[2]
+    number_of_chunks = ceil(file_size / utils.CHUNK_SIZE)
+    file_name = file[0].decode().rstrip('\x00')
+    print(file[0].decode().rstrip('\x00'))
+    get_chunks(file_name, number_of_chunks, peers_list)
+    # TODO: request the chunks and append them
+
+async def get_chunks(file_name, num_of_chunks, peers_list):
+    # TODO: Find a way to (1) request chunks and (2) wait for them to finish and (3) connect in order
 
 async def peer_connected_handler(reader, writer):
     print(writer.get_extra_info('peername'))
@@ -155,3 +150,15 @@ if __name__ == '__main__':
     loop.close()
 
     
+
+# def get_chunk(file_name,num_of_chunks):
+    # try:
+    #     file = open(file_name)
+    #     for x in range(num_of_chunks+1): # loop for sending the chunks.
+    #         print(num_of_chunks)
+    #         chunk = file.read(utils.CHUNK_SIZE)
+    #         print(chunk)
+
+    #     file.close()
+    # except Exception as e:
+    #     print(e)
