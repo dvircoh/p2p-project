@@ -123,7 +123,7 @@ async def recive_file(file: list)->bool:
     number_of_chunks = ceil(file_size / utils.CHUNK_SIZE)
     file_name = file[0].decode().rstrip('\x00')
     print(file[0].decode().rstrip('\x00'))
-    get_chunks(file_name, number_of_chunks, peers_list)
+    await get_chunks(file_name, number_of_chunks, peers_list)
     # TODO: request the chunks and append them
 
 async def get_chunks(file_name, num_of_chunks, peers_list): #
