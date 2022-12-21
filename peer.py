@@ -126,7 +126,7 @@ async def recive_file(file: list)->bool:
     get_chunks(file_name, number_of_chunks, peers_list)
     # TODO: request the chunks and append them
 
-async def get_chunks(file_name, num_of_chunks, peers_list):
+async def get_chunks(file_name, num_of_chunks, peers_list): #
     # TODO: Find a way to (1) request chunks and (2) wait for them to finish and (3) connect in order
 
 async def peer_connected_handler(reader, writer):

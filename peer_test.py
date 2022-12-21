@@ -4,7 +4,7 @@ import asyncio
 
 async def main():
     print("Test: begin")
-    tracker_ip = "127.0.0.1"
+    tracker_ip = input("please enter ip in order to connect tracker: ")
     result = await peer.init(tracker_ip)
     assert result, "add user to tracker failed"
     print("Test: init success")

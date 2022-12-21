@@ -10,6 +10,9 @@ def run_tracker(port):
     tracker_socket.listen()
     print("Tracker is up and running")
     data = ""
+    hostname = socket.gethostname()
+    IPAddr = socket.gethostbyname(hostname)
+    print("Tracker IP Address is:" + IPAddr)
 
     # Main loop
     while True:
