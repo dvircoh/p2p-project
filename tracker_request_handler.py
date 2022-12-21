@@ -1,5 +1,5 @@
 import struct
-import utils
+from utils import *
 
 users = []
 files = [] # name, checksum, size, list of ip addresses
@@ -20,7 +20,7 @@ def remove_user_handler(ip_addr):
         print("can't remove user, maybe user is not exist")
 
 def add_file_handler(ip_addr, payload):
-    file_name, checksum, file_size = struct.unpack(utils.ADD_FILE_PACKING, payload)
+    file_name, checksum, file_size = struct.unpack(ADD_FILE_PACKING, payload)
     print(file_name.decode().strip())
     print("checksum is" )
     print(checksum)
@@ -61,6 +61,6 @@ def send_files_handler():
     print(files_string)
     list_length = len(files_string)
     print(type(files_string))
-    return [utils.header_struct_generator(utils.REQUEST_CODES["SEND_FILES_LIST"], list_length),
+    return [header_struct_generator(REQUEST_CODES["SEND_FILES_LIST"], list_length),
      struct.pack(f'<{list_length}s',files_string)]
     

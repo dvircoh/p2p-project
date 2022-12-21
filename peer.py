@@ -1,6 +1,6 @@
 import asyncio
 from math import ceil
-import utils
+from utils import *
 import socket
 import peer_request_handler
 import sys
@@ -26,8 +26,8 @@ async def send_and_recv_tracker(tracker_ip, message)->bytes:
         writer.write(item)
         await writer.drain()
 
-    data_header = await reader.read(struct.calcsize(utils.HEADER_PACKING))
-    message_code, payload_size = struct.unpack(utils.HEADER_PACKING, data_header)
+    data_header = await reader.read(struct.calcsize(HEADER_PACKING))
+    message_code, payload_size = struct.unpack(HEADER_PACKING, data_header)
     if payload_size > 0:  # For add_user and remove_user the payload empty
         payload = await reader.read(payload_size)
 
@@ -37,7 +37,7 @@ async def send_and_recv_tracker(tracker_ip, message)->bytes:
 # Joining the network by sending a message to the tracker
 async def init(tracker_ip)->bool:
     # Create "message" as list for consistenty in send_to_tracker()
-    message = [utils.header_struct_generator(utils.REQUEST_CODES["ADD_USER"], 0)]
+    message = [header_struct_generator(REQUEST_CODES["ADD_USER"], 0)]
     success = await send_to_tracker(tracker_ip, message)
     return success  
 
@@ -78,7 +78,7 @@ async def tracker_connection():
         await actions(tracker_ip, choice)
 
 async def actions(tracker_ip, choice):
-    if(choice == utils.REQUEST_CODES['ADD_FILE']):
+    if(choice == REQUEST_CODES['ADD_FILE']):
         file_path = await ainput("enter file path for adding:")
         message = peer_request_handler.add_file_handler(file_path)
         if message[0] == 0: # file adding failed
@@ -88,7 +88,7 @@ async def actions(tracker_ip, choice):
             print("add file success")
         else:
             print("add file don't success, try again")
-    elif(choice == utils.REQUEST_CODES['REMOVE_FILE']):
+    elif(choice == REQUEST_CODES['REMOVE_FILE']):
         file_name = await ainput("enter filename for remove:")
         message = peer_request_handler.remove_file_handler(file_name)
         success = await send_to_tracker(tracker_ip, message)
@@ -96,14 +96,14 @@ async def actions(tracker_ip, choice):
             print("remove file success")
         else:
             print("remove file don't success, try again")
-    elif(choice == utils.REQUEST_CODES['REMOVE_USER']):
+    elif(choice == REQUEST_CODES['REMOVE_USER']):
         message = peer_request_handler.remove_user_handler()
         success = await send_to_tracker(tracker_ip, message)
         if success:
             print("disconnecting success")
         else:
             print("disconnecting don't success")
-    elif(choice == utils.REQUEST_CODES['SEND_FILES_LIST']):
+    elif(choice == REQUEST_CODES['SEND_FILES_LIST']):
         message = peer_request_handler.send_files_list_handler()
         result = await send_and_recv_tracker(tracker_ip, message)
         # Create list from the bytes
@@ -120,7 +120,7 @@ async def actions(tracker_ip, choice):
 async def recive_file(file: list)->bool:
     peers_list = file[3]
     file_size = file[2]
-    number_of_chunks = ceil(file_size / utils.CHUNK_SIZE)
+    number_of_chunks = ceil(file_size / CHUNK_SIZE)
     file_name = file[0].decode().rstrip('\x00')
     print(file[0].decode().rstrip('\x00'))
     await get_chunks(file_name, number_of_chunks, peers_list)
@@ -133,16 +133,16 @@ async def get_chunks(file_name, num_of_chunks, peers_list): #
 async def peer_connected_handler(reader, writer):
     print(writer.get_extra_info('peername')) #need to get header -'REQUEST_FILE' get header(code,payload size)
     # next message ( file name, chunk number)
-    data_header = await reader.read(struct.calcsize(utils.HEADER_PACKING))
-    message_code, payload_size = struct.unpack(utils.HEADER_PACKING, data_header)
+    data_header = await reader.read(struct.calcsize(HEADER_PACKING))
+    message_code, payload_size = struct.unpack(HEADER_PACKING, data_header)
     if payload_size > 0:  # For add_user and remove_user the payload empty
         payload = await reader.read(payload_size)
-        file_name, chunk_number = struct.unpack(utils.REQUEST_FILE_PACKING, payload)
+        file_name, chunk_number = struct.unpack(REQUEST_FILE_PACKING, payload)
         print(chunk_number)
         try:
             file = open(file_name)
-            file += (chunk_number - 1 ) * utils.CHUNK_SIZE
-            chunk = file.read(utils.CHUNK_SIZE)
+            file += (chunk_number - 1 ) * CHUNK_SIZE
+            chunk = file.read(CHUNK_SIZE)
             print(chunk)
             file.close()
         except Exception as e:
@@ -174,7 +174,7 @@ if __name__ == '__main__':
     #     file = open(file_name)
     #     for x in range(num_of_chunks+1): # loop for sending the chunks.
     #         print(num_of_chunks)
-    #         chunk = file.read(utils.CHUNK_SIZE)
+    #         chunk = file.read(CHUNK_SIZE)
     #         print(chunk)
 
     #     file.close()
