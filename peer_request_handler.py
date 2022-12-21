@@ -55,6 +55,9 @@ def remove_user_handler():
 def send_files_list_handler():
     return [header_struct_generator(REQUEST_CODES["SEND_FILES_LIST"], 0)]
 
+async def request_file_handler():
+    return [header_struct_generator(REQUEST_CODES["REQUEST_FILE"], 6)]
+
 
 # # Generic function to create response header struct
 # def header_struct_generator(code, payload_size):

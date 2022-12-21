@@ -114,10 +114,12 @@ async def actions(tracker_ip, choice):
             print("The file list is empty, there are no files to receive")
         else:
             choice = await select_file(files_list)
-            success = await recive_file(files_list[choice])
+            success = await receive_file(files_list[choice])
+    elif (choice == REQUEST_CODES['SEND_FILE']):
+        message = peers_connection()
+        #success = await
 
-
-async def recive_file(file: list)->bool:
+async def receive_file(file: list)->bool:
     peers_list = file[3]
     file_size = file[2]
     number_of_chunks = ceil(file_size / CHUNK_SIZE)
@@ -129,6 +131,7 @@ async def recive_file(file: list)->bool:
 async def get_chunks(file_name, num_of_chunks, peers_list): #
     print("hi")
     # TODO: Find a way to (1) request chunks and (2) wait for them to finish and (3) connect in order
+
 
 async def peer_connected_handler(reader, writer):
     print(writer.get_extra_info('peername')) #need to get header -'REQUEST_FILE' get header(code,payload size)
@@ -150,9 +153,9 @@ async def peer_connected_handler(reader, writer):
 
 
 
-async def peers_connection(): #for the one that send the files
-     server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12346')
-     await server.serve_forever()
+async def peers_connection(tracker_ip): #for the one that send the files
+    server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12346')
+    await server.serve_forever()
 
 async def main():
     print('''Hello and welcome to our P2P application!
