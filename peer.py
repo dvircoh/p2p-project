@@ -2,7 +2,7 @@ import asyncio
 from math import ceil
 from utils import *
 import socket
-import peer_request_handler
+from peer_request_handler import *
 import sys
 import struct
 
@@ -80,7 +80,7 @@ async def tracker_connection():
 async def actions(tracker_ip, choice):
     if(choice == REQUEST_CODES['ADD_FILE']):
         file_path = await ainput("enter file path for adding:")
-        message = peer_request_handler.add_file_handler(file_path)
+        message = add_file_handler(file_path)
         if message[0] == 0: # file adding failed
             return
         success = await send_to_tracker(tracker_ip, message)
@@ -90,21 +90,21 @@ async def actions(tracker_ip, choice):
             print("add file don't success, try again")
     elif(choice == REQUEST_CODES['REMOVE_FILE']):
         file_name = await ainput("enter filename for remove:")
-        message = peer_request_handler.remove_file_handler(file_name)
+        message = remove_file_handler(file_name)
         success = await send_to_tracker(tracker_ip, message)
         if success:
             print("remove file success")
         else:
             print("remove file don't success, try again")
     elif(choice == REQUEST_CODES['REMOVE_USER']):
-        message = peer_request_handler.remove_user_handler()
+        message = remove_user_handler()
         success = await send_to_tracker(tracker_ip, message)
         if success:
             print("disconnecting success")
         else:
             print("disconnecting don't success")
     elif(choice == REQUEST_CODES['SEND_FILES_LIST']):
-        message = peer_request_handler.send_files_list_handler()
+        message = send_files_list_handler()
         result = await send_and_recv_tracker(tracker_ip, message)
         # Create list from the bytes
         print(result.decode('utf-8'))

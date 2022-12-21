@@ -1,32 +1,32 @@
-import peer
+from peer import *
 import asyncio
  #TODO: all cases check failed
 
 async def main():
     print("Test: begin")
     tracker_ip = input("please enter ip in order to connect tracker: ")
-    result = await peer.init(tracker_ip)
+    result = await init(tracker_ip)
     assert result, "add user to tracker failed"
     print("Test: init success")
-    message = peer.peer_request_handler.add_file_handler("hello_world")
-    result = await peer.send_to_tracker(tracker_ip, message)
+    message = add_file_handler("hello_world")
+    result = await send_to_tracker(tracker_ip, message)
     assert result, "add file failed"
     print("Test: add file success")
-    message = peer.peer_request_handler.send_files_list_handler()
-    result = await peer.send_and_recv_tracker(tracker_ip, message)
+    message = send_files_list_handler()
+    result = await send_and_recv_tracker(tracker_ip, message)
     result = eval(result.decode('utf-8'))
     print(result)
     print(type(result))
-    await peer.actions(tracker_ip, 5)
+    await actions(tracker_ip, 5)
     #assert result, "request files list failed"
     print("Test: request files list success")
     #TODO add some check on peers_connection in "peers.py"
-    message = peer.peer_request_handler.remove_file_handler("hello_world")
-    result = await peer.send_to_tracker(tracker_ip, message)
+    message = remove_file_handler("hello_world")
+    result = await send_to_tracker(tracker_ip, message)
     assert result, "remove file failed"
     print("Test: remove file success")
-    message = peer.peer_request_handler.remove_user_handler()
-    result = await peer.send_to_tracker(tracker_ip, message)
+    message = remove_user_handler()
+    result = await send_to_tracker(tracker_ip, message)
     assert result, "disconnecting failed"
     print("Test: disconnecting success")
 
