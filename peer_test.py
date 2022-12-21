@@ -20,6 +20,7 @@ async def main():
     await peer.actions(tracker_ip, 5)
     #assert result, "request files list failed"
     print("Test: request files list success")
+    #TODO add some check on peers_connection in "peers.py"
     message = peer.peer_request_handler.remove_file_handler("hello_world")
     result = await peer.send_to_tracker(tracker_ip, message)
     assert result, "remove file failed"

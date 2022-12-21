@@ -131,9 +131,26 @@ async def get_chunks(file_name, num_of_chunks, peers_list): #
     # TODO: Find a way to (1) request chunks and (2) wait for them to finish and (3) connect in order
 
 async def peer_connected_handler(reader, writer):
-    print(writer.get_extra_info('peername'))
+    print(writer.get_extra_info('peername')) #need to get header -'REQUEST_FILE' get header(code,payload size)
+    # next message ( file name, chunk number)
+    data_header = await reader.read(struct.calcsize(utils.HEADER_PACKING))
+    message_code, payload_size = struct.unpack(utils.HEADER_PACKING, data_header)
+    if payload_size > 0:  # For add_user and remove_user the payload empty
+        payload = await reader.read(payload_size)
+        file_name, chunk_number = struct.unpack(utils.REQUEST_FILE_PACKING, payload)
+        print(chunk_number)
+        try:
+            file = open(file_name)
+            file += (chunk_number - 1 ) * utils.CHUNK_SIZE
+            chunk = file.read(utils.CHUNK_SIZE)
+            print(chunk)
+            file.close()
+        except Exception as e:
+            print(e)
 
-async def peers_connection():
+
+
+async def peers_connection(): #for the one that send the files
      server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12346')
      await server.serve_forever()
 
