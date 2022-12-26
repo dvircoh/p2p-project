@@ -115,30 +115,20 @@ async def actions(tracker_ip, choice):
         else:
             choice = await select_file(files_list)
             success = await receive_file(files_list[choice])
-<<<<<<< HEAD
-
-
-=======
     elif (choice == REQUEST_CODES['SEND_FILE']):
         message = peers_connection()
         #success = await
 
->>>>>>> 1ba0adb4845eb19faf0548deb34cff8994260c70
 async def receive_file(file: list)->bool:
     peers_list = file[3]
     file_size = file[2]
     number_of_chunks = ceil(file_size / CHUNK_SIZE)
     file_name = file[0].decode().rstrip('\x00')
     print(file[0].decode().rstrip('\x00'))
-<<<<<<< HEAD
-    get_chunks(file_name, number_of_chunks, peers_list)
-=======
     await get_chunks(file_name, number_of_chunks, peers_list)
     # TODO: request the chunks and append them
->>>>>>> 1ba0adb4845eb19faf0548deb34cff8994260c70
 
 async def get_chunks(file_name, num_of_chunks, peers_list): #
-    print("hi")
     # TODO: Find a way to (1) request chunks and (2) wait for them to finish and (3) connect in order
     print(file_name)
 
@@ -146,9 +136,13 @@ async def get_chunks(file_name, num_of_chunks, peers_list): #
 async def peer_connected_handler(reader, writer):
     print(writer.get_extra_info('peername')) #need to get header -'REQUEST_FILE' get header(code,payload size)
     # next message ( file name, chunk number)
-    data_header = await reader.read(struct.calcsize(HEADER_PACKING))
-    message_code, payload_size = struct.unpack(HEADER_PACKING, data_header)
-    if payload_size > 0:  # For add_user and remove_user the payload empty
+    while True:
+        data_header = await reader.read(struct.calcsize(HEADER_PACKING))
+        if not data_header:
+            writer.close()
+            break
+        message_code, payload_size = struct.unpack(HEADER_PACKING, data_header)
+        #if payload_size > 0:  # For add_user and remove_user the payload empty
         payload = await reader.read(payload_size)
         file_name, chunk_number = struct.unpack(REQUEST_FILE_PACKING, payload)
         print(chunk_number)
@@ -157,6 +151,8 @@ async def peer_connected_handler(reader, writer):
             file += (chunk_number - 1 ) * CHUNK_SIZE
             chunk = file.read(CHUNK_SIZE)
             print(chunk)
+            writer.write(chunk)
+            await writer.drain()
             file.close()
         except Exception as e:
             print(e)
