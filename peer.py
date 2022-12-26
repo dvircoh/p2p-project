@@ -5,6 +5,8 @@ import socket
 from peer_request_handler import *
 import sys
 import struct
+# importing os module
+import os
 
 async def ainput(string: str) -> str:
     print(string + " ")
@@ -126,8 +128,25 @@ async def receive_file(file: list)->bool:
     file_name = file[0].decode().rstrip('\x00')
     print(file_name)
     chunks_array = await get_chunks(file_name, number_of_chunks, peers_list)
-
+    write_into_file(chunks_array, file_name)
     # TODO: request the chunks and append them
+
+async def write_into_file(list: list, file_name):
+
+    try:
+        # make downloads directory
+        current_directory = os.getcwd()
+        if not os.path.exists(current_directory+'/Downloads'):
+            final_directory = os.path.join(current_directory, r'/Downloads')
+            if not os.path.exists(final_directory):
+                os.makedirs(final_directory)
+
+        file = open(file_name, "w")
+        for item in list:
+            file.write(item)
+        file.close()
+    except Exception as e:
+        print(e)
 
 async def get_chunks(file_name: str, num_of_chunks: int, peers_list): #
     # TODO: Find a way to (1) request chunks and (2) wait for them to finish and (3) connect in order
