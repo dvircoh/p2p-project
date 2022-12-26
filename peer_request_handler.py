@@ -12,6 +12,7 @@ def crc_cksum(file_content)->int:
     return crc_checksum
 
 def add_file_handler(file_path: str)->list:
+    file_path = file_path.strip()
     file_name = os.path.basename(file_path)
     file_size = 0
 

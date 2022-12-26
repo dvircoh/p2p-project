@@ -103,7 +103,7 @@ async def actions(tracker_ip, choice):
             print("disconnecting success")
         else:
             print("disconnecting don't success")
-    elif(choice == REQUEST_CODES['SEND_FILES_LIST']):
+    elif(choice == REQUEST_CODES['GET_FILE']):
         message = send_files_list_handler()
         result = await send_and_recv_tracker(tracker_ip, message)
         # Create list from the bytes
@@ -124,7 +124,7 @@ async def receive_file(file: list)->bool:
     file_size = file[2]
     number_of_chunks = ceil(file_size / CHUNK_SIZE)
     file_name = file[0].decode().rstrip('\x00')
-    print(file[0].decode().rstrip('\x00'))
+    print(file_name)
     chunks_array = await get_chunks(file_name, number_of_chunks, peers_list)
 
     # TODO: request the chunks and append them
@@ -140,12 +140,13 @@ async def get_chunks(file_name: str, num_of_chunks: int, peers_list): #
     return tasks
 
 async def get_chunk(file_name: str, chunk_number: int, peers_list: list): #
-    peer = peers_list[chunk_number % peers_list.count()]
+    peer = peers_list[chunk_number % len(peers_list)]
     reader, writer = await asyncio.open_connection(peer, 12346)
-    header = [header_struct_generator(REQUEST_CODES["REQUEST_FILE"], struct.calcsize(REQUEST_FILE_PACKING)),
+    message = [header_struct_generator(REQUEST_CODES["REQUEST_FILE"], struct.calcsize(REQUEST_FILE_PACKING)),
                 struct.pack(REQUEST_FILE_PACKING, file_name.encode(), chunk_number)]
-    writer.write(header)
-    await writer.drain()
+    for item in message:
+        writer.write(item)
+        await writer.drain()
     result = await reader.read(struct.calcsize(SEND_FILE_PACKING))
     return result
 
@@ -164,7 +165,7 @@ async def peer_connected_handler(reader, writer):
         print(chunk_number)
         try:
             file = open(file_name)
-            file += (chunk_number - 1 ) * CHUNK_SIZE
+            file += (chunk_number) * CHUNK_SIZE
             chunk = file.read(CHUNK_SIZE)
             print(chunk)
             writer.write(chunk)
@@ -173,8 +174,8 @@ async def peer_connected_handler(reader, writer):
         except Exception as e:
             print(e)
 
-async def peers_connection(tracker_ip): #for the one that send the files
-    server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12346')
+async def peers_connection(): #for the one that send the files
+    server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12347')
     await server.serve_forever()
 
 async def main():

@@ -21,9 +21,9 @@ async def main():
     #assert result, "request files list failed"
     print("Test: request files list success")
 
-    message = request_file_handler()
-    await send_to_tracker(tracker_ip, message) #TODO add some check on peers_connection in "peers.py"
-    await actions(tracker_ip, 6)
+    message = await peers_connection("127.0.0.1")
+    # await send_to_tracker(tracker_ip, message) #TODO add some check on peers_connection in "peers.py"
+    # await actions(tracker_ip, 6)
 
     message = remove_file_handler("hello_world")
     result = await send_to_tracker(tracker_ip, message)
