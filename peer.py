@@ -125,13 +125,29 @@ async def receive_file(file: list)->bool:
     number_of_chunks = ceil(file_size / CHUNK_SIZE)
     file_name = file[0].decode().rstrip('\x00')
     print(file[0].decode().rstrip('\x00'))
-    await get_chunks(file_name, number_of_chunks, peers_list)
+    chunks_array = await get_chunks(file_name, number_of_chunks, peers_list)
+
     # TODO: request the chunks and append them
 
-async def get_chunks(file_name, num_of_chunks, peers_list): #
+async def get_chunks(file_name: str, num_of_chunks: int, peers_list): #
     # TODO: Find a way to (1) request chunks and (2) wait for them to finish and (3) connect in order
     print(file_name)
+    tasks = [0] * num_of_chunks
+    for chunk_number in range(num_of_chunks):
+        chunk_data = await get_chunk(file_name, chunk_number, peers_list)
+        print(chunk_data)
+        tasks[chunk_number] = chunk_data
+    return tasks
 
+async def get_chunk(file_name: str, chunk_number: int, peers_list: list): #
+    peer = peers_list[chunk_number % peers_list.count()]
+    reader, writer = await asyncio.open_connection(peer, 12346)
+    header = [header_struct_generator(REQUEST_CODES["REQUEST_FILE"], struct.calcsize(REQUEST_FILE_PACKING)),
+                struct.pack(REQUEST_FILE_PACKING, file_name.encode(), chunk_number)]
+    writer.write(header)
+    await writer.drain()
+    result = await reader.read(struct.calcsize(SEND_FILE_PACKING))
+    return result
 
 async def peer_connected_handler(reader, writer):
     print(writer.get_extra_info('peername')) #need to get header -'REQUEST_FILE' get header(code,payload size)
@@ -156,8 +172,6 @@ async def peer_connected_handler(reader, writer):
             file.close()
         except Exception as e:
             print(e)
-
-
 
 async def peers_connection(tracker_ip): #for the one that send the files
     server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12346')
