@@ -114,20 +114,20 @@ async def actions(tracker_ip, choice):
             print("The file list is empty, there are no files to receive")
         else:
             choice = await select_file(files_list)
-            success = await recive_file(files_list[choice])
+            success = await receive_file(files_list[choice])
 
 
-async def recive_file(file: list)->bool:
+async def receive_file(file: list)->bool:
     peers_list = file[3]
     file_size = file[2]
     number_of_chunks = ceil(file_size / utils.CHUNK_SIZE)
     file_name = file[0].decode().rstrip('\x00')
     print(file[0].decode().rstrip('\x00'))
     get_chunks(file_name, number_of_chunks, peers_list)
-    # TODO: request the chunks and append them
 
 async def get_chunks(file_name, num_of_chunks, peers_list):
     # TODO: Find a way to (1) request chunks and (2) wait for them to finish and (3) connect in order
+    print(file_name)
 
 async def peer_connected_handler(reader, writer):
     print(writer.get_extra_info('peername'))
