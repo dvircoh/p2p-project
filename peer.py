@@ -160,7 +160,7 @@ async def get_chunks(file_name: str, num_of_chunks: int, peers_list): #
 
 async def get_chunk(file_name: str, chunk_number: int, peers_list: list): #
     peer = peers_list[chunk_number % len(peers_list)]
-    reader, writer = await asyncio.open_connection(peer, 12346)
+    reader, writer = await asyncio.open_connection(peer, 12347)
     message = [header_struct_generator(REQUEST_CODES["REQUEST_FILE"], struct.calcsize(REQUEST_FILE_PACKING)),
                 struct.pack(REQUEST_FILE_PACKING, file_name.encode(), chunk_number)]
     for item in message:
@@ -184,7 +184,7 @@ async def peer_connected_handler(reader, writer):
         print(chunk_number)
         try:
             file = open(file_name)
-            file += (chunk_number) * CHUNK_SIZE
+            file.seek((chunk_number) * CHUNK_SIZE)
             chunk = file.read(CHUNK_SIZE)
             print(chunk)
             writer.write(chunk)
@@ -194,7 +194,7 @@ async def peer_connected_handler(reader, writer):
             print(e)
 
 async def peers_connection(): #for the one that send the files
-    server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12347')
+    server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12346')
     await server.serve_forever()
 
 async def main():
