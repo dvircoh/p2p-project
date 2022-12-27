@@ -13,7 +13,9 @@ async def ainput(string: str) -> str:
     return await asyncio.get_event_loop().run_in_executor(
             None, sys.stdin.readline)
 
-async def send_to_tracker(tracker_ip, message)->bool:
+# Send message to tracker
+# Return success status
+async def send_to_tracker(tracker_ip: str, message: list)->bool:
     reader, writer = await asyncio.open_connection(tracker_ip, 12345)
     for item in message:
         writer.write(item)
@@ -22,15 +24,18 @@ async def send_to_tracker(tracker_ip, message)->bool:
     writer.close()
     return success
 
-async def send_and_recv_tracker(tracker_ip, message)->bytes:
+# Send message to tracker
+# Return tracker answer
+async def send_and_recv_tracker(tracker_ip: str, message: list)->bytes:
     reader, writer = await asyncio.open_connection(tracker_ip, 12345)
+
     for item in message:
         writer.write(item)
         await writer.drain()
 
     data_header = await reader.read(struct.calcsize(HEADER_PACKING))
     message_code, payload_size = struct.unpack(HEADER_PACKING, data_header)
-    if payload_size > 0:  # For add_user and remove_user the payload empty
+    if payload_size > 0:
         payload = await reader.read(payload_size)
 
     writer.close()
@@ -44,23 +49,42 @@ async def init(tracker_ip)->bool:
     return success  
 
 # Returns the user's choice of the action they want to perform
-async def menu()->int: # TODO: check input
-    choice = await ainput('''What do you want to do? (enter number)
-    1. Add file
-    2. Remove file
-    3. Get file
-    4. Disconnecting from the network
-    ''')
-    return int(choice)
+async def menu()->int: # TODO: check input #TODO:disconnect
+    while True:
+        try:
+            choice = await ainput('''What do you want to do? (enter number)
+            1. Add file
+            2. Remove file
+            3. Get file
+            4. Disconnecting from the network
+            ''')
+            choice = int(choice.strip())
+            if choice < 1 or choice > 4:
+                print("Please enter number from the options")
+            else:
+                break
+        except ValueError:
+            print("Please enter only number")
+    return choice
 
 async def select_file(files_list: list)->int:
     print("Please select a file from the following files")
+
     for index, file in enumerate(files_list):
         # print index and file_name
         print(str(index) + ") - " + file[0].decode().rstrip('\x00'))
 
-    choice = await ainput("Enter the file number you want")
-    return int(choice)
+    while True:
+        try:
+            choice = await ainput("Enter the file number you want")
+            choice = int(choice.strip())
+            if choice < 0 or choice > len(files_list) - 1:
+                print("Please enter number from the options")
+            else:
+                break
+        except ValueError:
+            print("Please enter only number")
+    return choice
 
 async def tracker_connection():
     init_success = False
@@ -76,9 +100,12 @@ async def tracker_connection():
             print("The connection failed try again")
 
     while True:
-        choice = await menu()
-        print("choice" , choice) #TODO - delete
-        await actions(tracker_ip, choice)
+        try:
+            choice = await menu()
+            print("choice" , choice) #TODO - delete
+            await actions(tracker_ip, choice)
+        except Exception as e:
+            print(e)
 
 async def actions(tracker_ip, choice):
     if(choice == REQUEST_CODES['ADD_FILE']):
@@ -91,6 +118,7 @@ async def actions(tracker_ip, choice):
             print("add file success")
         else:
             print("add file don't success, try again")
+
     elif(choice == REQUEST_CODES['REMOVE_FILE']):
         file_name = await ainput("enter filename for remove:")
         message = remove_file_handler(file_name)
@@ -99,16 +127,21 @@ async def actions(tracker_ip, choice):
             print("remove file success")
         else:
             print("remove file don't success, try again")
+
     elif(choice == REQUEST_CODES['REMOVE_USER']):
         message = remove_user_handler()
         success = await send_to_tracker(tracker_ip, message)
         if success:
             print("disconnecting success")
+            print("bye bye")
+            exit(1)
         else:
             print("disconnecting don't success")
+
     elif(choice == REQUEST_CODES['GET_FILE']):
         message = send_files_list_handler()
         result = await send_and_recv_tracker(tracker_ip, message)
+
         # Create list from the bytes
         print(result.decode('utf-8'))
         files_list = eval(result.decode('utf-8'))
@@ -118,19 +151,16 @@ async def actions(tracker_ip, choice):
         else:
             choice = await select_file(files_list)
             success = await receive_file(files_list[choice])
-    elif (choice == REQUEST_CODES['SEND_FILE']):
-        message = peers_connection()
-        #success = await
+
 
 async def receive_file(file: list)->bool:
     peers_list = file[3]
     file_size = file[2]
-    number_of_chunks = ceil(file_size / CHUNK_SIZE)
     file_name = file[0].decode().rstrip('\x00')
+    number_of_chunks = ceil(file_size / CHUNK_SIZE)
     print(file_name)
     chunks_array = await get_chunks(file_name, number_of_chunks, peers_list)
     await write_into_file(chunks_array, file_name)
-    # TODO: request the chunks and append them
 
 async def write_into_file(list: list, file_name):
 
@@ -149,16 +179,14 @@ async def write_into_file(list: list, file_name):
     except Exception as e:
         print(e)
 
-async def get_chunks(file_name: str, num_of_chunks: int, peers_list): #
-    # TODO: Find a way to (1) request chunks and (2) wait for them to finish and (3) connect in order
-    print(file_name)
+async def get_chunks(file_name: str, num_of_chunks: int, peers_list: list)->list:
     tasks = []
     for chunk_number in range(num_of_chunks):
         tasks.append(get_chunk(file_name, chunk_number, peers_list))
     chunks_list = await asyncio.gather(*tasks)
     return chunks_list
 
-async def get_chunk(file_name: str, chunk_number: int, peers_list: list): #
+async def get_chunk(file_name: str, chunk_number: int, peers_list: list)->bytes:
     peer = peers_list[chunk_number % len(peers_list)]
     #TODO: add check that all work and if have problem go to other peer
     reader, writer = await asyncio.open_connection(peer, 12346)
@@ -171,19 +199,18 @@ async def get_chunk(file_name: str, chunk_number: int, peers_list: list): #
     return result
 
 async def peer_connected_handler(reader, writer):
-    print(writer.get_extra_info('peername')) #need to get header -'REQUEST_FILE' get header(code,payload size)
-    # next message ( file name, chunk number)
+    print(writer.get_extra_info('peername'), " - connected")
+
     while True:
         data_header = await reader.read(struct.calcsize(HEADER_PACKING))
         if not data_header:
             writer.close()
             break
         message_code, payload_size = struct.unpack(HEADER_PACKING, data_header)
-        #if payload_size > 0:  # For add_user and remove_user the payload empty
         payload = await reader.read(payload_size)
         file_name, chunk_number = struct.unpack(REQUEST_FILE_PACKING, payload)
         file_name = file_name.decode().rstrip('\x00')
-        print(chunk_number)
+        print("send chunk_number " + chunk_number)
         try:
             file = open(file_name)
             file.seek((chunk_number) * CHUNK_SIZE)
@@ -195,7 +222,7 @@ async def peer_connected_handler(reader, writer):
         except Exception as e:
             print(e)
 
-async def peers_connection(): #for the one that send the files
+async def peers_connection():
     server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12346')
     await server.serve_forever()
 
@@ -216,16 +243,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         pass
 
-    
-
-# def get_chunk(file_name,num_of_chunks):
-    # try:
-    #     file = open(file_name)
-    #     for x in range(num_of_chunks+1): # loop for sending the chunks.
-    #         print(num_of_chunks)
-    #         chunk = file.read(CHUNK_SIZE)
-    #         print(chunk)
-
-    #     file.close()
-    # except Exception as e:
-    #     print(e)

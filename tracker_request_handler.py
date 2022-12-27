@@ -34,6 +34,7 @@ def add_file_handler(ip_addr, payload):
     for file in files:
         if file_name == file[0]: # if file name already exist
             if checksum == file[1]: # identical checksum
+                #TODO: don't add ip again if it exist
                 file[3].append(ip_addr)
                 return True
             return False
