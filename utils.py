@@ -20,3 +20,4 @@ SEND_FILE_PACKING       =       f'<{CHUNK_SIZE}s I I'     # data, actual size, c
 # Generic function to create response header struct
 def header_struct_generator(message_code, payload_size):
     return struct.pack(HEADER_PACKING, message_code, payload_size)
+    

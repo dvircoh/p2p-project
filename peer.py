@@ -49,7 +49,7 @@ async def init(tracker_ip)->bool:
     return success  
 
 # Returns the user's choice of the action they want to perform
-async def menu()->int: # TODO: check input #TODO:disconnect
+async def menu()->int: #TODO: check disconnecting
     while True:
         try:
             choice = await ainput('''What do you want to do? (enter number)
@@ -243,4 +243,3 @@ if __name__ == '__main__':
         loop.close()
     except KeyboardInterrupt:
         pass
-
