@@ -151,12 +151,11 @@ async def write_into_file(list: list, file_name):
 async def get_chunks(file_name: str, num_of_chunks: int, peers_list): #
     # TODO: Find a way to (1) request chunks and (2) wait for them to finish and (3) connect in order
     print(file_name)
-    tasks = [0] * num_of_chunks
+    tasks = []
     for chunk_number in range(num_of_chunks):
-        chunk_data = await get_chunk(file_name, chunk_number, peers_list)
-        print(chunk_data)
-        tasks[chunk_number] = chunk_data
-    return tasks
+        tasks.append(get_chunk(file_name, chunk_number, peers_list))
+    chunks_list = asyncio.gather(tasks)
+    return chunks_list
 
 async def get_chunk(file_name: str, chunk_number: int, peers_list: list): #
     peer = peers_list[chunk_number % len(peers_list)]
@@ -187,7 +186,7 @@ async def peer_connected_handler(reader, writer):
             file.seek((chunk_number) * CHUNK_SIZE)
             chunk = file.read(CHUNK_SIZE)
             print(chunk)
-            writer.write(chunk)
+            writer.write(chunk.encode())
             await writer.drain()
             file.close()
         except Exception as e:
