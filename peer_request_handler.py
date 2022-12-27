@@ -5,7 +5,8 @@ from utils import *
 
 files = {}
 
-def crc_cksum(file_content)->int:
+# Return checksum of file. 
+def crc_cksum(file_content: bytes)->int:
     crc = crc32()
     crc.update(file_content)
     crc_checksum = crc.digest()
@@ -40,7 +41,7 @@ def add_file_handler(file_path: str)->list:
      struct.pack(ADD_FILE_PACKING, file_name.encode(), checksum, file_size)]
 
 
-def remove_file_handler(file_name):
+def remove_file_handler(file_name: str)->list:
     if file_name in files:
         # remove the file from the files dictionary
         del files[file_name]
@@ -50,12 +51,10 @@ def remove_file_handler(file_name):
         print("file does not exist in the list")
         return [False]
 
-def remove_user_handler():
+def remove_user_handler()->list:
     return [header_struct_generator(REQUEST_CODES["REMOVE_USER"], 0)]
 
-def send_files_list_handler():
+def send_files_list_handler()->list:
     return [header_struct_generator(REQUEST_CODES["SEND_FILES_LIST"], 0)]
 
-async def request_file_handler():
-    return [header_struct_generator(REQUEST_CODES["REQUEST_FILE"], 6)]
 
