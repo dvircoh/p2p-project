@@ -137,7 +137,6 @@ async def write_into_file(list: list, file_name):
     try:
         # make downloads directory
         current_directory = os.getcwd()
-        print(current_directory)
         final_directory = os.path.join(current_directory, 'P2P-Downloads')
         if not os.path.exists(final_directory):
             os.makedirs(final_directory)
