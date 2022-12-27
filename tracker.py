@@ -46,7 +46,9 @@ def read(peer_socket, peer_address):
             peer_socket.send(str(success).encode())
 
         elif message_code == REQUEST_CODES["REMOVE_USER"]:
-            tracker_request_handler.remove_user_handler(payload)
+            success = tracker_request_handler.remove_user_handler(peer_address)
+            print(success)
+            peer_socket.send(str(success).encode())
 
         elif message_code == REQUEST_CODES["SEND_FILES_LIST"]:
             files_list = tracker_request_handler.send_files_handler()
