@@ -17,12 +17,20 @@ def remove_user_handler(ip_addr):
         users.remove(ip_addr)
     except:
         print("can't remove user, maybe user is not exist")
+        return False
+    for file in files:
+        if ip_addr in file[3]:
+            file[3].remove(ip_addr)
+            if not file[3]:
+                files.remove(file)
+    print(files)
+    print(users)
+
+    return True
+
 
 def add_file_handler(ip_addr, payload):
     file_name, checksum, file_size = struct.unpack(ADD_FILE_PACKING, payload)
-    print(file_name.decode().strip())
-    print("checksum is" )
-    print(checksum)
     for file in files:
         if file_name == file[0]: # if file name already exist
             if checksum == file[1]: # identical checksum
@@ -31,12 +39,9 @@ def add_file_handler(ip_addr, payload):
                 return True
             return False
     # file name does not exist
-    print("file_size on tracker is:")
-    print(file_size)
     new_file_list = [file_name, checksum, file_size, [ip_addr]]
     print("new file list success")
     files.append(new_file_list)
-    print("append")
     return True
 
 
