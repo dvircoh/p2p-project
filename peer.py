@@ -137,15 +137,16 @@ async def write_into_file(list: list, file_name):
     try:
         # make downloads directory
         current_directory = os.getcwd()
-        if not os.path.exists(current_directory+'/Downloads'):
-            final_directory = os.path.join(current_directory, r'/Downloads')
-            if not os.path.exists(final_directory):
-                os.makedirs(final_directory)
-
-        file = open(file_name, "w") #TODO: change to async
+        print(current_directory)
+        final_directory = os.path.join(current_directory, 'P2P-Downloads')
+        if not os.path.exists(final_directory):
+            os.makedirs(final_directory)
+        completeName = os.path.join(final_directory, file_name)
+        file = open(completeName, "w") #TODO: change to async
         for item in list:
             file.write(item.decode())
         file.close()
+
     except Exception as e:
         print(e)
 
