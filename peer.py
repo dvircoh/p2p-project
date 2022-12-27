@@ -68,6 +68,7 @@ async def tracker_connection():
     # Loop for join tracker lists
     while not init_success:
         tracker_ip = input("Please enter IP of tracker ")
+        tracker_ip = tracker_ip.strip()
         init_success = await init(tracker_ip)
         if init_success:
             print("The connection was made successfully")
@@ -128,7 +129,7 @@ async def receive_file(file: list)->bool:
     file_name = file[0].decode().rstrip('\x00')
     print(file_name)
     chunks_array = await get_chunks(file_name, number_of_chunks, peers_list)
-    write_into_file(chunks_array, file_name)
+    await write_into_file(chunks_array, file_name)
     # TODO: request the chunks and append them
 
 async def write_into_file(list: list, file_name):
@@ -141,9 +142,9 @@ async def write_into_file(list: list, file_name):
             if not os.path.exists(final_directory):
                 os.makedirs(final_directory)
 
-        file = open(file_name, "w")
+        file = open(file_name, "w") #TODO: change to async
         for item in list:
-            file.write(item)
+            file.write(item.decode())
         file.close()
     except Exception as e:
         print(e)
@@ -154,12 +155,13 @@ async def get_chunks(file_name: str, num_of_chunks: int, peers_list): #
     tasks = []
     for chunk_number in range(num_of_chunks):
         tasks.append(get_chunk(file_name, chunk_number, peers_list))
-    chunks_list = asyncio.gather(tasks)
+    chunks_list = await asyncio.gather(*tasks)
     return chunks_list
 
 async def get_chunk(file_name: str, chunk_number: int, peers_list: list): #
     peer = peers_list[chunk_number % len(peers_list)]
-    reader, writer = await asyncio.open_connection(peer, 12347)
+    #TODO: add check that all work and if have problem go to other peer
+    reader, writer = await asyncio.open_connection(peer, 12346)
     message = [header_struct_generator(REQUEST_CODES["REQUEST_FILE"], struct.calcsize(REQUEST_FILE_PACKING)),
                 struct.pack(REQUEST_FILE_PACKING, file_name.encode(), chunk_number)]
     for item in message:
@@ -180,6 +182,7 @@ async def peer_connected_handler(reader, writer):
         #if payload_size > 0:  # For add_user and remove_user the payload empty
         payload = await reader.read(payload_size)
         file_name, chunk_number = struct.unpack(REQUEST_FILE_PACKING, payload)
+        file_name = file_name.decode().rstrip('\x00')
         print(chunk_number)
         try:
             file = open(file_name)
@@ -206,8 +209,12 @@ Here you can share files with the computers in your network''')
   
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
-    loop.close()
+    asyncio.set_event_loop(loop)
+    try:
+        loop.run_until_complete(main())
+        loop.close()
+    except KeyboardInterrupt:
+        pass
 
     
 
