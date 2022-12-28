@@ -18,17 +18,11 @@ def remove_user_handler(ip_addr):
     except:
         print("can't remove user, maybe user is not exist")
         return False
-    #for file in files:
-    #    if ip_addr in file[3]:
-    #        file[3].remove(ip_addr)
-    #        if not file[3]:
-    #            files.remove(temp)
-
-    files[:] = [file[3].remove(ip_addr) for file in files if ip_addr in file[3]]
-    files[:] = [files.remove(file) for file in files if not file[3]] #TODO remove empty files.
-    print(files)
-    print(users)
-
+    for file in files[:]:
+       if ip_addr in file[3]:
+           file[3].remove(ip_addr)
+           if not file[3]:
+               files.remove(file)
     return True
 
 
