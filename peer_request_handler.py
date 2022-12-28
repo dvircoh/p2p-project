@@ -23,14 +23,12 @@ def add_file_handler(file_path: str)->list:
         return [False]
     
     try:
-        file = open(file_path.strip()) # TODO check errors
-        print("file opened succesfully " + file_name)
+        file = open(file_path.strip())
         checksum = crc_cksum(file.read().encode())
         # Add file to list "files"
         files[file_name] = file_path
         file_size = os.path.getsize(file_path)
-        print("file size is:")
-        print(file_size)
+
     except Exception as e:
         print(e)
         return [False]

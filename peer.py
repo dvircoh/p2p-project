@@ -1,11 +1,9 @@
 import asyncio
 from math import ceil
 from utils import *
-import socket
 from peer_request_handler import *
 import sys
 import struct
-# importing os module
 import os
 
 async def ainput(string: str) -> str:
@@ -49,7 +47,7 @@ async def init(tracker_ip)->bool:
     return success  
 
 # Returns the user's choice of the action they want to perform
-async def menu()->int: #TODO: check disconnecting
+async def menu()->int:
     while True:
         try:
             choice = await ainput('''What do you want to do? (enter number)
@@ -102,7 +100,6 @@ async def tracker_connection():
     while True:
         try:
             choice = await menu()
-            print("choice" , choice) #TODO - delete
             await actions(tracker_ip, choice)
         except Exception as e:
             print(e)
@@ -159,19 +156,21 @@ async def receive_file(file: list)->bool:
     file_name = file[0].decode().rstrip('\x00')
     number_of_chunks = ceil(file_size / CHUNK_SIZE)
     print(file_name)
-    chunks_array = await get_chunks(file_name, number_of_chunks, peers_list)
-    await write_into_file(chunks_array, file_name)
+    chunks_list = await get_chunks(file_name, number_of_chunks, peers_list)
+    await write_into_file(chunks_list, file_name)
 
-async def write_into_file(list: list, file_name):
+async def write_into_file(chunks_list: list, file_name):
 
     try:
-        # make downloads directory
+        # make P2P-Downloads directory
         current_directory = os.getcwd()
         final_directory = os.path.join(current_directory, 'P2P-Downloads')
         if not os.path.exists(final_directory):
             os.makedirs(final_directory)
-        completeName = os.path.join(final_directory, file_name)
-        file = open(completeName, "w") #TODO: change to async
+
+
+        file_path = os.path.join(final_directory, file_name)
+        file = open(file_path, "w")
         for item in list:
             file.write(item.decode())
         file.close()
@@ -187,16 +186,23 @@ async def get_chunks(file_name: str, num_of_chunks: int, peers_list: list)->list
     return chunks_list
 
 async def get_chunk(file_name: str, chunk_number: int, peers_list: list)->bytes:
-    peer = peers_list[chunk_number % len(peers_list)]
-    #TODO: add check that all work and if have problem go to other peer
-    reader, writer = await asyncio.open_connection(peer, 12346)
-    message = [header_struct_generator(REQUEST_CODES["REQUEST_FILE"], struct.calcsize(REQUEST_FILE_PACKING)),
-                struct.pack(REQUEST_FILE_PACKING, file_name.encode(), chunk_number)]
-    for item in message:
-        writer.write(item)
-        await writer.drain()
-    result = await reader.read(struct.calcsize(SEND_FILE_PACKING))
-    return result
+    index_for_failer = 0 # If the read fail then index increase for read from next peer
+    while index_for_failer < len(peers_list):
+        try:
+            peer = peers_list[chunk_number + index_for_failer % len(peers_list)]
+            reader, writer = await asyncio.open_connection(peer, 12346)
+            message = [header_struct_generator(REQUEST_CODES["REQUEST_FILE"], struct.calcsize(REQUEST_FILE_PACKING)),
+                        struct.pack(REQUEST_FILE_PACKING, file_name.encode(), chunk_number)]
+            for item in message:
+                writer.write(item)
+                await writer.drain()
+            result = await reader.read(struct.calcsize(SEND_FILE_PACKING))
+            return result
+        except Exception as e:
+            print(e)
+            index_for_failer +=1
+    raise Exception("can't recieve the file " + file_name + " from any peer.\nconnection fail")
+    
 
 async def peer_connected_handler(reader, writer):
     print(writer.get_extra_info('peername'), " - connected")
