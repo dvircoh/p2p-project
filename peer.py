@@ -67,11 +67,14 @@ async def tracker_connection():
 
     # Loop for join tracker lists
     while not init_success:
-        tracker_ip = input("Please enter IP of tracker ")
+
+        tracker_ip = input('''
+        Please enter IP of tracker -  ''')
+
         tracker_ip = tracker_ip.strip()
         init_success = await init(tracker_ip)
         if init_success:
-            print("The connection was made successfully")
+            print_success_connection()
         else:
             print("The connection failed try again")
 
@@ -79,6 +82,8 @@ async def tracker_connection():
         choice = await menu()
         print("choice" , choice) #TODO - delete
         await actions(tracker_ip, choice)
+
+
 
 async def actions(tracker_ip, choice):
     if(choice == REQUEST_CODES['ADD_FILE']):
@@ -196,12 +201,28 @@ async def peer_connected_handler(reader, writer):
             print(e)
 
 async def peers_connection(): #for the one that send the files
-    server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12346')
+    server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12347')
     await server.serve_forever()
+def print_success_connection():
+    print('''    -----------------------------------------
+    | The connection was made successfully  |
+    -----------------------------------------''')
 
+    print()
+
+    print('''    |---------|  ~~~~~~~> |---------| 
+    |...Peer..|           |...Peer..|
+    |---------|           |---------| 
+    \          \           \         \ 
+     \..........\           \.........\  ''')
+
+    print()
 async def main():
-    print('''Hello and welcome to our P2P application!
-Here you can share files with the computers in your network''')
+    print('''    ********************************************
+    Hello and welcome to our P2P application!
+    Here you can share files with the computers
+    in your network
+    ********************************************''')
 
     f1 = loop.create_task(tracker_connection())
     f2 = loop.create_task(peers_connection())
