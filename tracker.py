@@ -3,18 +3,13 @@ import struct
 import tracker_request_handler
 from utils import *
 
+
 def run_tracker(port):
     # Init socket
     tracker_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     tracker_socket.bind(("0.0.0.0", 12345))
     tracker_socket.listen()
-    print("Tracker is up and running")
-    data = ""
-    hostname = socket.gethostname()
-    IPAddr = socket.gethostbyname(hostname)
-    print("--------------------------------------")
-    print("| Tracker IP Address is:  " + IPAddr+"    |")
-    print("--------------------------------------")
+    print_tracker_is_on()
 
     # Main loop
     while True:
@@ -69,6 +64,27 @@ def recieve_from_peers(peer_socket, peer_address):
             for message in tracker_request_handler.error():
                 peer_socket.sendall(message)
 
+
+def print_tracker_is_on():
+
+    print(''' _______          ______         _______  
+|       \        /      \       |       \ 
+| $$$$$$$\      |  $$$$$$\      | $$$$$$$\ 
+| $$__/ $$       \$$__| $$      | $$__/ $$
+| $$    $$       /      $$      | $$    $$
+| $$$$$$$       |  $$$$$$       | $$$$$$$ 
+| $$            | $$_____       | $$      
+| $$            | $$     \      | $$      
+ \$$             \$$$$$$$$       \$$  
+              ''')
+
+    print("Tracker is up and running")
+    data = ""
+    hostname = socket.gethostname()
+    IPAddr = socket.gethostbyname(hostname)
+    print("--------------------------------------")
+    print("| Tracker IP Address is:  " + IPAddr+"    |")
+    print("--------------------------------------")
 
 
 def main():
