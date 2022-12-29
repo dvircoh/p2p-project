@@ -7,6 +7,7 @@ import subprocess
 async def main():
     print("Test: begin")
     tracker_process = subprocess.Popen('python tracker.py', creationflags=8, close_fds=True)
+    other_peer_process = subprocess.Popen('python other_peer_test.py', creationflags=8, close_fds=True)
     tracker_ip = "127.0.0.1"
     result = await init(tracker_ip)
     assert result, "add user to tracker failed"
@@ -17,7 +18,6 @@ async def main():
     result = await send_to_tracker(tracker_ip, message)
     assert result, "add file failed"
     print("Test: add file success")
-    tracker_process.kill()
     await actions(tracker_ip, 4)
     message = send_files_list_handler()
     result = await send_and_recv_tracker(tracker_ip, message)
@@ -41,6 +41,9 @@ async def main():
     assert result, "disconnecting failed"
     print("Test: disconnecting success")
 
+    # Close subprocesses (very importent for free the ports)
+    other_peer_process.kill()
+    tracker_process.kill()
     
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()

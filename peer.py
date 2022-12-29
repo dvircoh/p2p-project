@@ -201,6 +201,7 @@ async def get_chunk(file_name: str, chunk_number: int, peers_list: list)->bytes:
                 writer.write(item)
                 await writer.drain()
             result = await reader.read(struct.calcsize(SEND_FILE_PACKING))
+            print("receive chunk number " + chunk_number + " from " + peer)
             return result
         except Exception as e:
             print(e)
