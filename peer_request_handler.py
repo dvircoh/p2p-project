@@ -23,7 +23,7 @@ def add_file_handler(file_path: str)->list:
         return [False]
     
     try:
-        file = open(file_path.strip())
+        file = open(file_path)
         checksum = crc_cksum(file.read().encode())
         # Add file to list "files"
         files[file_name] = file_path
@@ -40,6 +40,7 @@ def add_file_handler(file_path: str)->list:
 
 
 def remove_file_handler(file_name: str)->list:
+    file_name = file_name.strip()
     if file_name in files:
         # remove the file from the files dictionary
         del files[file_name]
