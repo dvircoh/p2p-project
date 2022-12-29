@@ -96,8 +96,8 @@ async def tracker_connection():
             print("The connection was made successfully")
         else:
             print("The connection failed try again")
-
-    while True:
+    choice = 0
+    while choice != 4:
         try:
             choice = await menu()
             await actions(tracker_ip, choice)
@@ -131,7 +131,6 @@ async def actions(tracker_ip, choice):
         if success:
             print("disconnecting success")
             print("bye bye")
-            exit(1)
         else:
             print("disconnecting don't success")
 
@@ -228,8 +227,8 @@ async def peer_connected_handler(reader, writer):
         except Exception as e:
             print(e)
 
-async def peers_connection():
-    server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12346')
+async def peers_connection(host = '0.0.0.0', port = '12346'):
+    server = await asyncio.start_server(peer_connected_handler, host, port)
     await server.serve_forever()
 
 async def main():
