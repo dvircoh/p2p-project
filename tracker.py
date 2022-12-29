@@ -21,7 +21,7 @@ def run_tracker(port):
         try:
             (peer_socket,(peer_address, peer_port)) = tracker_socket.accept()
             print("Peer connected")
-            read(peer_socket, peer_address) # TODO :change read() to other name
+            recieve_from_peers(peer_socket, peer_address)
             peer_socket.close()
             # When/if user suddenly exits
         except ConnectionError:
@@ -32,31 +32,39 @@ def run_tracker(port):
             print(e)
 
 
-def read(peer_socket, peer_address):
+def recieve_from_peers(peer_socket, peer_address):
         data_header = peer_socket.recv(struct.calcsize(HEADER_PACKING))
         message_code, payload_size = struct.unpack(HEADER_PACKING, data_header)
         print(message_code)
+
         if payload_size > 0: # For add_user and remove_user the payload empty
                     payload = peer_socket.recv(payload_size)
-                   # print(payload)
+
         if message_code == REQUEST_CODES["ADD_USER"]:
             success = tracker_request_handler.add_user_handler(peer_address)
             print(success)
             peer_socket.send(str(success).encode())
+
         elif message_code == REQUEST_CODES["REMOVE_USER"]:
-            tracker_request_handler.remove_user_handler(payload)
+            success = tracker_request_handler.remove_user_handler(peer_address)
+            print(success)
+            peer_socket.send(str(success).encode())
+
         elif message_code == REQUEST_CODES["SEND_FILES_LIST"]:
             files_list = tracker_request_handler.send_files_handler()
             peer_socket.sendall(files_list[0])
             peer_socket.sendall(files_list[1])
+
         elif message_code == REQUEST_CODES["ADD_FILE"]:
             success = tracker_request_handler.add_file_handler(peer_address, payload)
             print(success)
             peer_socket.send(str(success).encode())
+
         elif message_code == REQUEST_CODES["REMOVE_FILE"]:
             success = tracker_request_handler.remove_file_handler(peer_address, payload)
             print(success)
             peer_socket.send(str(success).encode())
+
         else:
             for message in tracker_request_handler.error():
                 peer_socket.sendall(message)
