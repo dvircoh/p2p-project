@@ -233,14 +233,10 @@ async def peer_connected_handler(reader, writer):
         except Exception as e:
             print(e)
 
-<<<<<<< HEAD
-async def peers_connection(): #for the one that send the files
-    server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12347')
-=======
 async def peers_connection():
     server = await asyncio.start_server(peer_connected_handler, host='0.0.0.0', port='12346')
->>>>>>> 557eba079d8eec838aa6fa5224d6d84b61244364
     await server.serve_forever()
+
 def print_success_connection():
     print('''    -----------------------------------------
     | The connection was made successfully  |
