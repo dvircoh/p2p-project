@@ -99,7 +99,11 @@ async def tracker_connection():
             else:
                 print("The connection failed try again")
         except Exception as e:
-            print("The connection failed try again")
+            print('''
+            The connection failed.
+            try again and make sure that the tracker is running at first
+            and that the ip address is correct\n''')
+
     choice = 0
     while choice != 4:
         try:
