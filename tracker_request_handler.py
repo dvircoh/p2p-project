@@ -37,8 +37,8 @@ def add_file_handler(ip_addr, payload):
                 if ip_addr not in file[3]:
                     file[3].append(ip_addr)
                     return True
+            print("There is already file with this name but with different content. please rename your file and try to add it again")
             return False # Checksum unmatch or user already exist in the list
-            
     # File name does not exist so add new file to files list
     new_file = [file_name, checksum, file_size, [ip_addr]]
     print("new file list success")
