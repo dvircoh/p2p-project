@@ -88,15 +88,17 @@ async def tracker_connection():
 
     # Loop for join tracker lists
     while not init_success:
+        try:
+            tracker_ip = input('''
+            Please enter IP of tracker -  ''')
 
-        tracker_ip = input('''
-        Please enter IP of tracker -  ''')
-
-        tracker_ip = tracker_ip.strip()
-        init_success = await init(tracker_ip)
-        if init_success:
-            print_success_connection()
-        else:
+            tracker_ip = tracker_ip.strip()
+            init_success = await init(tracker_ip)
+            if init_success:
+                print_success_connection()
+            else:
+                print("The connection failed try again")
+        except Exception as e:
             print("The connection failed try again")
     choice = 0
     while choice != 4:
