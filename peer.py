@@ -33,8 +33,7 @@ async def send_and_recv_tracker(tracker_ip: str, message: list)->bytes:
 
     data_header = await reader.read(struct.calcsize(HEADER_PACKING))
     message_code, payload_size = struct.unpack(HEADER_PACKING, data_header)
-    if payload_size > 0:
-        payload = await reader.read(payload_size)
+    payload = await reader.read(payload_size)
 
     writer.close()
     return payload
@@ -162,6 +161,7 @@ async def receive_file(file: list)->bool:
     print(file_name)
     chunks_list = await get_chunks(file_name, number_of_chunks, peers_list)
     await write_into_file(chunks_list, file_name)
+    return True
 
 async def write_into_file(chunks_list: list, file_name):
 
@@ -172,10 +172,9 @@ async def write_into_file(chunks_list: list, file_name):
         if not os.path.exists(final_directory):
             os.makedirs(final_directory)
 
-
         file_path = os.path.join(final_directory, file_name)
         file = open(file_path, "w")
-        for item in list:
+        for item in chunks_list:
             file.write(item.decode())
         file.close()
 
@@ -201,7 +200,7 @@ async def get_chunk(file_name: str, chunk_number: int, peers_list: list)->bytes:
                 writer.write(item)
                 await writer.drain()
             result = await reader.read(struct.calcsize(SEND_FILE_PACKING))
-            print("receive chunk number " + chunk_number + " from " + peer)
+            print("receive chunk number " + str(chunk_number) + " from " + peer)
             return result
         except Exception as e:
             print(e)
