@@ -15,7 +15,7 @@ async def main():
     print("Test: begin")
     # Create tracker and new peer for checks
     #tracker_process = subprocess.Popen('python tracker.py', creationflags=8, close_fds=True)
-    #other_peer_process = subprocess.Popen('python other_peer_test.py', creationflags=8, close_fds=True)
+    other_peer_process = subprocess.Popen('python other_peer_test.py', creationflags=8, close_fds=True)
 
     # Check connection to tracker and join to the network
     tracker_ip = "127.0.0.1"
@@ -50,11 +50,8 @@ async def main():
     # Sleep for other peer test add file
     await asyncio.sleep(3) 
 
-
-    message = await peers_connection("127.0.0.1")
-    # await send_to_tracker(tracker_ip, message) #TODO add some check on peers_connection in "peers.py"
-    # await actions(tracker_ip, 6)
-
+    files_list = eval(files_list_result.decode('utf-8'))
+    success = await receive_file(files_list[1])
 
     # Remove user
     message = remove_user_handler()
@@ -64,7 +61,7 @@ async def main():
     print("Test: disconnecting success")
 
     # Close subprocesses (very importent for free the ports)
-    #other_peer_process.kill()
+    other_peer_process.kill()
     #tracker_process.kill()
     
 if __name__ == '__main__':
