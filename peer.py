@@ -198,7 +198,7 @@ async def get_chunk(file_name: str, chunk_number: int, peers_list: list)->bytes:
     index_for_failer = 0 # If the read fail then index increase for read from next peer
     while index_for_failer < len(peers_list):
         try:
-            peer = peers_list[chunk_number + index_for_failer % len(peers_list)]
+            peer = peers_list[(chunk_number + index_for_failer) % len(peers_list)]
             reader, writer = await asyncio.open_connection(peer, 12346)
             message = [header_struct_generator(REQUEST_CODES["REQUEST_FILE"], struct.calcsize(REQUEST_FILE_PACKING)),
                         struct.pack(REQUEST_FILE_PACKING, file_name.encode(), chunk_number)]
@@ -226,7 +226,7 @@ async def peer_connected_handler(reader, writer):
         payload = await reader.read(payload_size)
         file_name, chunk_number = struct.unpack(REQUEST_FILE_PACKING, payload)
         file_name = file_name.decode().rstrip('\x00')
-        print("send chunk_number " + chunk_number)
+        print("send chunk_number " + str(chunk_number))
         try:
             file = open(file_name)
             file.seek((chunk_number) * CHUNK_SIZE)
