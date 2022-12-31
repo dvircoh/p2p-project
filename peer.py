@@ -127,6 +127,16 @@ async def actions(tracker_ip, choice):
             print("add file don't success, try again")
 
     elif(choice == REQUEST_CODES['REMOVE_FILE']):
+        message = send_remove_files_list_handler()
+        result = await send_and_recv_tracker(tracker_ip, message)
+
+        # Create list from the bytes
+        print(result.decode('utf-8'))
+        files_list = eval(result.decode('utf-8'))
+        print(files_list)
+        if files_list == []:  # Check if the list empty
+            print("The file list is empty, there are no files to receive")
+
         file_name = await ainput("enter filename for remove:")
         message = remove_file_handler(file_name)
         success = await send_to_tracker(tracker_ip, message)

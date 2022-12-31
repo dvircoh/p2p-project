@@ -59,3 +59,4 @@ def remove_user_handler()->list:
 
 def send_files_list_handler()->list:
     return [header_struct_generator(REQUEST_CODES["SEND_FILES_LIST"], 0)]
+
