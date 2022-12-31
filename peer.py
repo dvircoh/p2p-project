@@ -127,6 +127,7 @@ async def actions(tracker_ip, choice):
             print("add file don't success, try again")
 
     elif(choice == REQUEST_CODES['REMOVE_FILE']):
+        print("The files you added to the network are:")
         for file in files:
             print(file)
         file_name = await ainput("enter filename for remove:")
