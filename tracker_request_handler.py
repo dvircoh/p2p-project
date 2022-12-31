@@ -66,4 +66,6 @@ def send_files_handler():
     list_length = len(files_string)
     return [header_struct_generator(REQUEST_CODES["SEND_FILES_LIST"], list_length),
      struct.pack(f'<{list_length}s',files_string)]
+
+
     
