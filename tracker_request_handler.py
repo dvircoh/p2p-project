@@ -41,7 +41,7 @@ def add_file_handler(ip_addr, payload):
             return False # Checksum unmatch or user already exist in the list
     # File name does not exist so add new file to files list
     new_file = [file_name, checksum, file_size, [ip_addr]]
-    print("new file list success")
+    print("add new file to list success")
     files.append(new_file)
     return True
 
