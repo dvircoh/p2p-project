@@ -1,5 +1,5 @@
 import asyncio
-from math import ceil
+from math import ceil, floor
 from utils import *
 from peer_request_handler import *
 import sys
@@ -157,7 +157,12 @@ async def actions(tracker_ip, choice):
         else:
             choice = await select_file(files_list)
             success = await receive_file(files_list[choice])
-
+            if success:
+                # Added new file to tracker
+                file_name =  files_list[choice][0].decode().rstrip('\x00')
+                new_file_path = os.path.join(os.getcwd(), 'P2P-Downloads', file_name)
+                message = add_file_handler(new_file_path)
+                await send_to_tracker(tracker_ip, message)
 
 async def receive_file(file: list)->bool:
     peers_list = file[3]
@@ -179,9 +184,10 @@ async def write_into_file(chunks_list: list, file_name):
             os.makedirs(final_directory)
 
         file_path = os.path.join(final_directory, file_name)
-        file = open(file_path, "w")
-        for item in chunks_list:
-            file.write(item.decode())
+        file = open(file_path, "wb")
+        for chunk in chunks_list:
+            for data in chunk:
+                file.write(data)
         file.close()
 
     except Exception as e:
@@ -189,27 +195,36 @@ async def write_into_file(chunks_list: list, file_name):
 
 async def get_chunks(file_name: str, num_of_chunks: int, peers_list: list)->list:
     tasks = []
-    for chunk_number in range(num_of_chunks):
-        tasks.append(get_chunk(file_name, chunk_number, peers_list))
+    chuncks_for_peer = num_of_chunks / len(peers_list)
+    chunk_number = 0
+    for i, peer in enumerate(peers_list):
+        peer_chunks_list = []
+        while chunk_number < num_of_chunks and floor(chunk_number / chuncks_for_peer) == i:
+            peer_chunks_list.append(chunk_number)
+            chunk_number += 1
+        tasks.append(get_chunk(file_name, peer_chunks_list, peer, peers_list))
     chunks_list = await asyncio.gather(*tasks)
     return chunks_list
 
-async def get_chunk(file_name: str, chunk_number: int, peers_list: list)->bytes:
+async def get_chunk(file_name: str, chunks_list: list, peer_ip: str, peers_list: list)->list:
     index_for_failer = 0 # If the read fail then index increase for read from next peer
     while index_for_failer < len(peers_list):
         try:
-            peer = peers_list[(chunk_number + index_for_failer) % len(peers_list)]
-            reader, writer = await asyncio.open_connection(peer, 12346)
-            message = [header_struct_generator(REQUEST_CODES["REQUEST_FILE"], struct.calcsize(REQUEST_FILE_PACKING)),
-                        struct.pack(REQUEST_FILE_PACKING, file_name.encode(), chunk_number)]
-            for item in message:
-                writer.write(item)
-                await writer.drain()
-            result = await reader.read(struct.calcsize(SEND_FILE_PACKING))
-            print("receive chunk number " + str(chunk_number) + " from " + peer)
+            result = []
+            reader, writer = await asyncio.open_connection(peer_ip, 12346)
+            for chunk_number in chunks_list:
+                message = [header_struct_generator(REQUEST_CODES["REQUEST_FILE"], struct.calcsize(REQUEST_FILE_PACKING)),
+                            struct.pack(REQUEST_FILE_PACKING, file_name.encode(), chunk_number)]
+                for item in message:
+                    writer.write(item)
+                    await writer.drain()
+                data = await reader.read(struct.calcsize(SEND_FILE_PACKING))
+                result.append(data)
+                print("receive chunk number " + str(chunk_number) + " from " + peer_ip)
             return result
         except Exception as e:
             print(e)
+            peer_ip = peers_list[index_for_failer]
             index_for_failer +=1
     raise Exception("can't recieve the file " + file_name + " from any peer.\nconnection fail")
     
@@ -228,17 +243,17 @@ async def peer_connected_handler(reader, writer):
         file_name = file_name.decode().rstrip('\x00')
         print("send chunk_number " + str(chunk_number))
         try:
-            file = open(file_name)
+            file = open(file_name, "rb")
             file.seek((chunk_number) * CHUNK_SIZE)
             chunk = file.read(CHUNK_SIZE)
             print(chunk)
-            writer.write(chunk.encode())
+            writer.write(chunk)
             await writer.drain()
             file.close()
         except Exception as e:
             print(e)
 
-async def peers_connection(host = '0.0.0.0', port = '12346'):
+async def peers_connection(host = '0.0.0.0', port = '12347'):
     server = await asyncio.start_server(peer_connected_handler, host, port)
     await server.serve_forever()
 

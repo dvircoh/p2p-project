@@ -51,7 +51,7 @@ async def main():
 
     files_list_result = await send_and_recv_tracker(tracker_ip, send_files_list_message)
     files_list = eval(files_list_result.decode('utf-8'))
-    success = await receive_file(files_list[1])
+    success = await receive_file(files_list[2])
 
     # Remove user
     message = remove_user_handler()

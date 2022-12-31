@@ -12,7 +12,7 @@ async def main():
 
     message = add_file_handler("hello_world")
     await send_to_tracker(tracker_ip, message)
-    message = add_file_handler("crc.py")
+    message = add_file_handler("IEEE-spec.pdf")
     await send_to_tracker(tracker_ip, message)
 
     send_files_list_message = send_files_list_handler()
