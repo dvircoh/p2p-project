@@ -4,19 +4,17 @@ from utils import *
 users = [] # ip address
 files = [] # name, checksum, size, list of ip addresses
 
-def add_user_handler(ip_addr):
-   # if ip_addr in users:
-   #     print("user is already exist,try a different request")
-   #     return False
-    users.append(ip_addr)
-    print(ip_addr)
+def add_user_handler(ip_addr: str):
+    if ip_addr not in users:
+        users.append(ip_addr)
+    print(ip_addr + "connect to the network")
     return True
 
 def remove_user_handler(ip_addr):
     try:
         users.remove(ip_addr)
     except:
-        print("can't remove user, maybe user is not exist")
+        print("can't remove user, maybe user does not exist")
         return False
     
     # Remove user from the files he added, if have not more peers added this file remove file.
@@ -25,6 +23,7 @@ def remove_user_handler(ip_addr):
            file[3].remove(ip_addr)
            if not file[3]:
                files.remove(file)
+    print(ip_addr + "remove from the network")
     return True
 
 

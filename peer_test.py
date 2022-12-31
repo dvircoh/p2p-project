@@ -20,13 +20,13 @@ async def main():
     tracker_ip = "127.0.0.1"
     result = await init(tracker_ip)
     assert result, "add user to tracker failed"
-    print("Test: init success")
+    print("Test: init succeeded")
 
     # Check requst files list from tracker
     send_files_list_message = send_files_list_handler()
     files_list_result = await send_and_recv_tracker(tracker_ip, send_files_list_message)
     assert files_list_result == results_for_assert[0], "request files list failed"
-    print("Test: request files list success")
+    print("Test: request files list succeeded")
 
     # Check add tow files
     message = add_file_handler("hello_world")
@@ -37,14 +37,14 @@ async def main():
     result = await send_to_tracker(tracker_ip, message)
     files_list_result = await send_and_recv_tracker(tracker_ip, send_files_list_message)
     assert result and (files_list_result == results_for_assert[2]), "add file 'exemple1' to tracker failed"
-    print("Test: add files to tracker success")
+    print("Test: add files to tracker succeeded")
 
     # Check remove file
     message = remove_file_handler("hello_world")
     result = await send_to_tracker(tracker_ip, message)
     files_list_result = await send_and_recv_tracker(tracker_ip, send_files_list_message)
     assert result and (files_list_result == results_for_assert[3]), "remove file 'hello_world' from tracker failed"
-    print("Test: remove 'hello_world' file success")
+    print("Test: remove 'hello_world' file succeeded")
 
     # Sleep for other peer test add file
     await asyncio.sleep(3) 
@@ -52,13 +52,18 @@ async def main():
     files_list_result = await send_and_recv_tracker(tracker_ip, send_files_list_message)
     files_list = eval(files_list_result.decode('utf-8'))
     success = await receive_file(files_list[2])
+    file_path = os.path.join(os.getcwd(), 'P2P-Downloads', files_list[2][0].decode().rstrip('\x00'))
+    file = open(file_path, "rb")
+    checksum = crc_cksum(file.read())
+    assert success and checksum == files_list[2][1], "downloed file failed"
+    print("Test: downloed file succeeded")
 
     # Remove user
     message = remove_user_handler()
     result = await send_to_tracker(tracker_ip, message)
     assert result, "disconnecting failed"
     await actions(tracker_ip, 4)
-    print("Test: disconnecting success")
+    print("Test: disconnecting succeeded")
 
     # Close subprocesses (very importent for free the ports)
     other_peer_process.kill()

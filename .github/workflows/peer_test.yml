@@ -1,0 +1,10 @@
+name: push test
+on: [push]  # run on push
+jobs:
+  run-code-sanity:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - run: python peet_test.py
