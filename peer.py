@@ -127,6 +127,8 @@ async def actions(tracker_ip, choice):
             print("add file don't success, try again")
 
     elif(choice == REQUEST_CODES['REMOVE_FILE']):
+        for file in files:
+            print(file)
         file_name = await ainput("enter filename for remove:")
         message = remove_file_handler(file_name)
         success = await send_to_tracker(tracker_ip, message)
