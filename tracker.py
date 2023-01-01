@@ -7,7 +7,7 @@ from utils import *
 def run_tracker(port):
     # Init socket
     tracker_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    tracker_socket.bind(("0.0.0.0", port))
+    tracker_socket.bind(("0.0.0.0", 12345))
     tracker_socket.listen()
     print_tracker_is_on()
 
