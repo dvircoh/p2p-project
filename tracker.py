@@ -7,7 +7,7 @@ from utils import *
 def run_tracker(port):
     # Init socket
     tracker_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    tracker_socket.bind(("0.0.0.0", 12345))
+    tracker_socket.bind(("0.0.0.0", port))
     tracker_socket.listen()
     print_tracker_is_on()
 
@@ -30,19 +30,16 @@ def run_tracker(port):
 def recieve_from_peers(peer_socket, peer_address):
         data_header = peer_socket.recv(struct.calcsize(HEADER_PACKING))
         message_code, payload_size = struct.unpack(HEADER_PACKING, data_header)
-        print(message_code)
 
         if payload_size > 0: # For add_user and remove_user the payload empty
                     payload = peer_socket.recv(payload_size)
 
         if message_code == REQUEST_CODES["ADD_USER"]:
             success = tracker_request_handler.add_user_handler(peer_address)
-            print(success)
             peer_socket.send(str(success).encode())
 
         elif message_code == REQUEST_CODES["REMOVE_USER"]:
             success = tracker_request_handler.remove_user_handler(peer_address)
-            print(success)
             peer_socket.send(str(success).encode())
 
         elif message_code == REQUEST_CODES["SEND_FILES_LIST"]:
@@ -52,12 +49,10 @@ def recieve_from_peers(peer_socket, peer_address):
 
         elif message_code == REQUEST_CODES["ADD_FILE"]:
             success = tracker_request_handler.add_file_handler(peer_address, payload)
-            print(success)
             peer_socket.send(str(success).encode())
 
         elif message_code == REQUEST_CODES["REMOVE_FILE"]:
             success = tracker_request_handler.remove_file_handler(peer_address, payload)
-            print(success)
             peer_socket.send(str(success).encode())
 
 

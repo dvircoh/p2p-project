@@ -12,17 +12,12 @@ def crc_cksum(file_content)->int:
     crc_checksum = crc.digest()
     return crc_checksum
 
-#function to unpad data
-def unpad(self, s):
-    return s[:-ord(s[-1:])]
-
 def add_file_handler(file_path: str)->list:
     file_path = file_path.strip()
     file_name = os.path.basename(file_path)
     file_size = 0
 
     if file_name in files:
-        print(files)
         print("This file already exist in the list")
         return [False]
     

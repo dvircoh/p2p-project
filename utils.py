@@ -11,10 +11,10 @@ REQUEST_CODES = {'ADD_USER':        0,
 
 CHUNK_SIZE = 4096
 
-HEADER_PACKING          =       '<I I'           # message_code, payload_size
-ADD_FILE_PACKING        =       '<255s I I'      # file_name, checksum, file_size
-REMOVE_FILE_PACKING     =       '<255s'          # file_name
-REQUEST_FILE_PACKING    =       '<255s I'        # file_name, chunk_number
+HEADER_PACKING          =       '<I I'                    # message_code, payload_size
+ADD_FILE_PACKING        =       '<255s I I'               # file_name, checksum, file_size
+REMOVE_FILE_PACKING     =       '<255s'                   # file_name
+REQUEST_FILE_PACKING    =       '<255s I'                 # file_name, chunk_number
 SEND_FILE_PACKING       =       f'<{CHUNK_SIZE}s I I'     # data, actual size, checksum
 
 # Generic function to create response header struct

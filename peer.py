@@ -105,7 +105,7 @@ async def tracker_connection():
             and that the ip address is correct\n''')
 
     choice = 0
-    while choice != 4:
+    while choice != REQUEST_CODES['REMOVE_USER']:
         try:
             choice = await menu()
             await actions(tracker_ip, choice)
@@ -128,8 +128,9 @@ async def actions(tracker_ip, choice):
 
     elif(choice == REQUEST_CODES['REMOVE_FILE']):
         print("The files you added to the network are:")
-        for file in files:
-            print(file)
+        for index, file in enumerate(files):
+            # print index and file_name
+            print(str(index) + ") - " + file)
         file_name = await ainput("enter filename for remove:")
         message = remove_file_handler(file_name)
         success = await send_to_tracker(tracker_ip, message)
@@ -152,9 +153,7 @@ async def actions(tracker_ip, choice):
         result = await send_and_recv_tracker(tracker_ip, message)
 
         # Create list from the bytes
-        print(result.decode('utf-8'))
         files_list = eval(result.decode('utf-8'))
-        print(files_list)
         if files_list == []: # Check if the list empty
             print("The file list is empty, there are no files to receive")
         else:
@@ -172,7 +171,7 @@ async def receive_file(file: list)->bool:
     file_size = file[2]
     file_name = file[0].decode().rstrip('\x00')
     number_of_chunks = ceil(file_size / CHUNK_SIZE)
-    print(file_name)
+    print("receive " + file_name)
     chunks_list = await get_chunks(file_name, number_of_chunks, peers_list)
     await write_into_file(chunks_list, file_name)
     return True
@@ -224,6 +223,7 @@ async def get_chunk(file_name: str, chunks_list: list, peer_ip: str, peers_list:
                 data = await reader.read(struct.calcsize(SEND_FILE_PACKING))
                 result.append(data)
                 print("receive chunk number " + str(chunk_number) + " from " + peer_ip)
+            writer.close()
             return result
         except Exception as e:
             print(e)
@@ -249,14 +249,13 @@ async def peer_connected_handler(reader, writer):
             file = open(file_name, "rb")
             file.seek((chunk_number) * CHUNK_SIZE)
             chunk = file.read(CHUNK_SIZE)
-            print(chunk)
             writer.write(chunk)
             await writer.drain()
             file.close()
         except Exception as e:
             print(e)
 
-async def peers_connection(host = '0.0.0.0', port = '12347'):
+async def peers_connection(host = '0.0.0.0', port = '12346'):
     server = await asyncio.start_server(peer_connected_handler, host, port)
     await server.serve_forever()
 

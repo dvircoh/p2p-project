@@ -17,7 +17,6 @@ async def main():
 
     send_files_list_message = send_files_list_handler()
     files_list_result = await send_and_recv_tracker(tracker_ip, send_files_list_message)
-    print(files_list_result)
 
     message = await peers_connection('0.0.0.0', "12346")
 
