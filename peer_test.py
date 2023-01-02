@@ -32,8 +32,8 @@ async def main():
         # Check add tow files
         message = add_file_handler("hello_world")
         result = await send_to_tracker(tracker_ip, message)
-        #files_list_result = await send_and_recv_tracker(tracker_ip, send_files_list_message)
-        assert result, "add file 'hello_world' to tracker failed"
+        files_list_result = await send_and_recv_tracker(tracker_ip, send_files_list_message)
+        assert result and (files_list_result == results_for_assert[1]), "add file 'hello_world' to tracker failed"
         message = add_file_handler("exemple1")
         result = await send_to_tracker(tracker_ip, message)
         files_list_result = await send_and_recv_tracker(tracker_ip, send_files_list_message)
