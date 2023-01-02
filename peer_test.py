@@ -69,10 +69,12 @@ async def main():
         # Close subprocesses (very importent for free the ports)
         other_peer_process.kill()
         tracker_process.kill()
+        exit(0)
     except Exception as e:
         print(e)
         other_peer_process.kill()
         tracker_process.kill()
+        exit(1)
     
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
