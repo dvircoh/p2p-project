@@ -69,7 +69,8 @@ async def main():
         # Close subprocesses (very importent for free the ports)
         other_peer_process.kill()
         tracker_process.kill()
-    except:
+    except Exception as e:
+        print(e)
         other_peer_process.kill()
         tracker_process.kill()
     
