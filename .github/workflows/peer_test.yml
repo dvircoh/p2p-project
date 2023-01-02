@@ -11,5 +11,4 @@ jobs:
     - uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-      with:
     - run: python peet_test.py
