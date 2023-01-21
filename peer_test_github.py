@@ -13,6 +13,7 @@ async def main():
         print("Test: begin")
         # Create tracker and new peer for checks
         tracker_process = subprocess.Popen('python tracker.py', creationflags=8, close_fds=True)
+        other_peer_process = subprocess.Popen('python other_peer_test.py', creationflags=8, close_fds=True)
 
         # Check connection to tracker and join to the network
         tracker_ip = "127.0.0.1"
