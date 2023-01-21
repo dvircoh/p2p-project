@@ -61,7 +61,7 @@ async def main():
         file = open(file_path, "rb")
         checksum = crc_cksum(file.read())
         assert success and checksum == files_list[2][1], "downloed file failed"
-        print("Test: downloed file succeeded")
+        print("Test: downloed file succeeded!")
 
         # Remove user
         message = remove_user_handler()
