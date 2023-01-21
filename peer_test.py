@@ -30,6 +30,8 @@ async def main():
 
         # Check add tow files
         message = add_file_handler("hello_world")
+        file_name, checksum, file_size = struct.unpack(ADD_FILE_PACKING, message[1])
+        print(checksum)
         result = await send_to_tracker(tracker_ip, message)
         files_list_result = await send_and_recv_tracker(tracker_ip, send_files_list_message)
         print(str(files_list_result))
