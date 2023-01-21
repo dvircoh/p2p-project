@@ -48,7 +48,7 @@ async def main():
         print("Test: remove 'hello_world' file succeeded")
 
         # Sleep for other peer test add file
-        await asyncio.sleep(3) 
+        await asyncio.sleep(4) 
 
         files_list_result = await send_and_recv_tracker(tracker_ip, send_files_list_message)
         files_list = eval(files_list_result.decode('utf-8'))
