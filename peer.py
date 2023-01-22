@@ -20,6 +20,7 @@ async def send_to_tracker(tracker_ip: str, message: list)->bool:
         await writer.drain()
     success = bool(await reader.read(1))
     writer.close()
+    await writer.wait_closed()
     return success
 
 # Send message to tracker
@@ -36,6 +37,7 @@ async def send_and_recv_tracker(tracker_ip: str, message: list)->bytes:
     payload = await reader.read(payload_size)
 
     writer.close()
+    await writer.wait_closed()
     return payload
 
 # Joining the network by sending a message to the tracker
@@ -163,8 +165,9 @@ async def actions(tracker_ip, choice):
                 # Added new file to tracker
                 file_name =  files_list[choice][0].decode().rstrip('\x00')
                 new_file_path = os.path.join(os.getcwd(), 'P2P-Downloads', file_name)
-                message = add_file_handler(new_file_path)
-                await send_to_tracker(tracker_ip, message)
+                if file_name not in files:
+                    message = add_file_handler(new_file_path)
+                    await send_to_tracker(tracker_ip, message)
 
 async def receive_file(file: list)->bool:
     peers_list = file[3]
@@ -224,6 +227,7 @@ async def get_chunk(file_name: str, chunks_list: list, peer_ip: str, peers_list:
                 result.append(data)
                 print("receive chunk number " + str(chunk_number) + " from " + peer_ip)
             writer.close()
+            await writer.wait_closed()
             return result
         except Exception as e:
             print(e)
@@ -239,6 +243,7 @@ async def peer_connected_handler(reader, writer):
         data_header = await reader.read(struct.calcsize(HEADER_PACKING))
         if not data_header:
             writer.close()
+            await writer.wait_closed()
             break
         message_code, payload_size = struct.unpack(HEADER_PACKING, data_header)
         payload = await reader.read(payload_size)
